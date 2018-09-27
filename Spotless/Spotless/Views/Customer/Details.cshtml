@@ -1,0 +1,53 @@
+﻿@model Spotless.Models.Customer
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@using (Html.BeginForm())
+{
+
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(m => m.id)
+
+    <div class="block">
+        <div class="block-header block-header-default">
+            <h3 class="block-title">Customer</h3>
+        </div>
+        <div class="block-content">
+            <div class="form-group row">
+                @Html.LabelFor(m => m.fullName, new { @Class = "col-12" })
+                <div class="col-md-12">
+                    @Html.TextBoxFor(m => m.fullName, new { @Class = "form-control" })
+                    @Html.ValidationMessageFor(m => m.fullName)
+                </div>
+            </div>
+
+             <div class="form-group row">
+                @Html.Label("Type", new { @Class = "col-12" })
+                <div class="col-md-12">
+                    @Html.DropDownListFor(m => m.typeId, (SelectList)ViewBag.Types, "select your type", new { @Class = "form-control" })
+                    @Html.ValidationMessageFor(m => m.typeId)
+                </div>
+            </div>
+
+            <div class="form-group row">
+                @Html.Label("Status", new { @Class = "col-12" })
+                <div class="col-md-12">
+                    @Html.DropDownListFor(m => m.isActive, new List<SelectListItem>() { new SelectListItem() { Text = "Active", Value = "True" }, new SelectListItem() { Text = "Inactive", Value = "False" } }, new { @Class = "form-control" })
+                    @Html.ValidationMessageFor(m => m.isActive)
+                </div>
+            </div>
+
+            <div class="form-group row">
+                @Html.Label("Customer Services", new { @Class = "col-12" })
+                <div class="col-md-12">
+                    @{var customerservices = Model != null && Model.CustomerServices.Any() ? Model.CustomerServices.Select(d => new MultiSelectResult() { TEXT = d.Service.title, VALUE = d.Service.id.ToString() }).ToList() : new List<MultiSelectResult>();}
+                    @Html.MultiSelect("CustomerServices", customerservices, "Service", "GetServices")
+                </div>
+            </div>
+
+            @{Html.RenderPartial("par_Crud");}
+
+        </div>
+    </div>
+}

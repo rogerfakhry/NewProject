@@ -1,0 +1,147 @@
+/**
+ * Title: Sympletts Flaticon Pack
+ * Author: Bogdan Rosu
+ * Source: http://www.flaticon.com/packs/sympletts
+ * License:  CC BY 3.0 (http://creativecommons.org/licenses/by/3.0/)
+ */
+
+@font-face {
+	font-family: "fl-sympletts";
+	src: url("../fonts/fl-sympletts.eot");
+	src: url("../fonts/fl-sympletts.eot#iefix") format("embedded-opentype"),
+	url("../fonts/fl-sympletts.woff") format("woff"),
+	url("../fonts/fl-sympletts.ttf") format("truetype"),
+	url("../fonts/fl-sympletts.svg") format("svg");
+	font-weight: normal;
+	font-style: normal;
+}
+
+.fl-sympletts-ico,
+[class^="fl-sympletts-"]:before, [class*=" fl-sympletts-"]:before,
+[class^="fl-sympletts-"]:after, [class*=" fl-sympletts-"]:after {   
+	font-family: 'fl-sympletts';
+    font-size: inherit;
+	font-weight: 400;
+	font-style: normal;
+}
+
+.fl-sympletts-anchor:before {
+	content: "\e000";
+}
+.fl-sympletts-archery4:before {
+	content: "\e001";
+}
+.fl-sympletts-armchair:before {
+	content: "\e002";
+}
+.fl-sympletts-attach:before {
+	content: "\e003";
+}
+.fl-sympletts-bell69:before {
+	content: "\e004";
+}
+.fl-sympletts-brightness14:before {
+	content: "\e005";
+}
+.fl-sympletts-button18:before {
+	content: "\e006";
+}
+.fl-sympletts-camera122:before {
+	content: "\e007";
+}
+.fl-sympletts-check-mark4:before {
+	content: "\e008";
+}
+.fl-sympletts-clock162:before {
+	content: "\e009";
+}
+.fl-sympletts-coffee2:before {
+	content: "\e00a";
+}
+.fl-sympletts-coin18:before {
+	content: "\e00b";
+}
+.fl-sympletts-diamond44:before {
+	content: "\e00c";
+}
+.fl-sympletts-down-arrow19:before {
+	content: "\e00d";
+}
+.fl-sympletts-equalizer43:before {
+	content: "\e00e";
+}
+.fl-sympletts-euro:before {
+	content: "\e00f";
+}
+.fl-sympletts-float2:before {
+	content: "\e010";
+}
+.fl-sympletts-folder261:before {
+	content: "\e011";
+}
+.fl-sympletts-glasses:before {
+	content: "\e012";
+}
+.fl-sympletts-heart365:before {
+	content: "\e013";
+}
+.fl-sympletts-house181:before {
+	content: "\e014";
+}
+.fl-sympletts-key191:before {
+	content: "\e015";
+}
+.fl-sympletts-link73:before {
+	content: "\e016";
+}
+.fl-sympletts-magnet1:before {
+	content: "\e017";
+}
+.fl-sympletts-magnifying-glass17:before {
+	content: "\e018";
+}
+.fl-sympletts-paper-plane1:before {
+	content: "\e019";
+}
+.fl-sympletts-pen82:before {
+	content: "\e01a";
+}
+.fl-sympletts-present34:before {
+	content: "\e01b";
+}
+.fl-sympletts-question-mark2:before {
+	content: "\e01c";
+}
+.fl-sympletts-refresh4:before {
+	content: "\e01d";
+}
+.fl-sympletts-screen85:before {
+	content: "\e01e";
+}
+.fl-sympletts-share16:before {
+	content: "\e01f";
+}
+.fl-sympletts-speech-bubble21:before {
+	content: "\e020";
+}
+.fl-sympletts-star206:before {
+	content: "\e021";
+}
+.fl-sympletts-tag4:before {
+	content: "\e022";
+}
+.fl-sympletts-target58:before {
+	content: "\e023";
+}
+.fl-sympletts-umbrella:before {
+	content: "\e024";
+}
+.fl-sympletts-user8:before {
+	content: "\e025";
+}
+.fl-sympletts-video-game8:before {
+	content: "\e026";
+}
+.fl-sympletts-wifi103:before {
+	content: "\e027";
+}

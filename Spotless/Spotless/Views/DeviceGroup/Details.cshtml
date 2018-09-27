@@ -1,0 +1,103 @@
+﻿@model Spotless.Models.DeviceGroup
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var Logged_User = (UserProfile)ViewBag.LoggedUser;
+    var isAdmin = true;
+    var currentRoles = Roles.GetRolesForUser(Logged_User.UserName);
+    if (!currentRoles.Contains(ConfigurationManager.AppSettings["SuperAdminRoleName"]) && !currentRoles.Contains(ConfigurationManager.AppSettings["AdminRoleName"]))
+    {
+        isAdmin = false;
+    }
+}
+
+@using (Html.BeginForm())
+{
+
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(m => m.id)
+
+    <div class="block">
+        <div class="block-header block-header-default">
+            <h3 class="block-title">Device Group</h3>
+        </div>
+        <div class="block-content">
+            <div class="form-group row">
+                @Html.LabelFor(m => m.title, new { @Class = "col-12" })
+                <div class="col-md-12">
+                    @Html.TextBoxFor(m => m.title, new { @Class = "form-control" })
+                    @Html.ValidationMessageFor(m => m.title)
+                </div>
+            </div>
+            @if (isAdmin)
+            {
+                <div class="form-group row">
+                    @Html.LabelFor(m => m.comPort, new { @Class = "col-12" })
+                    <div class="col-md-12">
+                        @Html.TextBoxFor(m => m.comPort, new { @Class = "form-control" })
+                        @Html.ValidationMessageFor(m => m.comPort)
+                    </div>
+                </div>
+                <div class="form-group row">
+                    @Html.LabelFor(m => m.address, new { @Class = "col-12" })
+                    <div class="col-md-12">
+                        @Html.TextBoxFor(m => m.address, new { @Class = "form-control" })
+                        @Html.ValidationMessageFor(m => m.address)
+                    </div>
+                </div>
+                <div class="form-group row">
+                    @Html.LabelFor(m => m.StaticIP, new { @Class = "col-12" })
+                    <div class="col-md-12">
+                        @Html.TextBoxFor(m => m.StaticIP, new { @Class = "form-control" })
+                        @Html.ValidationMessageFor(m => m.StaticIP)
+                    </div>
+                </div>
+                <div class="form-group row">
+                    @Html.LabelFor(m => m.Macaddress, new { @Class = "col-12" })
+                    <div class="col-md-12">
+                        @Html.TextBoxFor(m => m.Macaddress, new { @Class = "form-control" })
+                        @Html.ValidationMessageFor(m => m.Macaddress)
+                    </div>
+                </div>
+                <div class="form-group row">
+                    @Html.Label("Customer", new { @Class = "col-12" })
+                    <div class="col-md-12">
+                        @Html.DropDownListFor(m => m.customerId, (SelectList)ViewBag.Customers, "select your customer", new { @Class = "form-control" })
+                        @Html.ValidationMessageFor(m => m.customerId)
+                    </div>
+                </div>
+                <div class="form-group row">
+                    @Html.Label("Service", new { @Class = "col-12" })
+                    <div class="col-md-12">
+                        @Html.DropDownListFor(m => m.serviceId, (SelectList)ViewBag.Services, "select your service", new { @Class = "form-control" })
+                        @Html.ValidationMessageFor(m => m.serviceId)
+                    </div>
+                </div>
+
+
+            }
+            <div class="form-group row">
+                @Html.LabelFor(m => m.Longitude, new { @Class = "col-12" })
+                <div class="col-md-12">
+                    @Html.TextBox("googleMapLat", Model == null ? 33.88692186799784 : Model.Latitude, new { @Class = "MAPLatitude form-control" })
+                </div>
+            </div>
+
+            <div class="form-group row">
+                @Html.LabelFor(m => m.Latitude, new { @Class = "col-12" })
+                <div class="col-md-12">
+                    @Html.TextBox("googleMapLong", Model == null ? 35.533215332031205 : Model.Longitude, new { @Class = "MAPLongtude form-control" })
+                </div>
+            </div>
+
+            <div class="form-group row">
+                @Html.Label("Google Map", new { @Class = "col-12" })
+                <div class="col-12" id="mapcontainer" style="min-height: 300px;">
+                    @Html.GoogleMap(Model == null ? 33.88692186799784 : Model.Latitude, Model == null ? 35.533215332031205 : Model.Longitude, null, "mapcontainer", Model == null)
+                </div>
+            </div>
+
+            @{Html.RenderPartial("par_Crud");}
+
+        </div>
+    </div>
+                }

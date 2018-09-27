@@ -1,0 +1,71 @@
+﻿@model Spotless.Models.Service
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@using (Html.BeginForm())
+{
+
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(m => m.id)
+
+    <div class="block">
+        <div class="block-header block-header-default">
+            <h3 class="block-title">Service</h3>
+        </div>
+        <div class="block-content">
+            <div class="form-group row">
+                @Html.LabelFor(m => m.title, new { @Class = "col-12" })
+                <div class="col-md-12">
+                    @Html.TextBoxFor(m => m.title, new { @Class = "form-control" })
+                    @Html.ValidationMessageFor(m => m.title)
+                </div>
+            </div>
+            <div class="form-group row">
+                @Html.LabelFor(m => m.comPort, new { @Class = "col-12" })
+                <div class="col-md-12">
+                    @Html.TextBoxFor(m => m.comPort, new { @Class = "form-control" })
+                </div>
+            </div>
+
+            <div class="form-group row">
+                @Html.LabelFor(m => m.dataBit, new { @Class = "col-12" })
+                <div class="col-md-12">
+                    @Html.TextBoxFor(m => m.dataBit, new { @Class = "form-control" })
+                </div>
+            </div>
+
+            <div class="form-group row">
+                @Html.LabelFor(m => m.parity, new { @Class = "col-12" })
+                <div class="col-md-12">
+                    @Html.TextBoxFor(m => m.parity, new { @Class = "form-control" })
+                </div>
+            </div>
+
+            <div class="form-group row">
+                @Html.LabelFor(m => m.stopBit, new { @Class = "col-12" })
+                <div class="col-md-12">
+                    @Html.TextBoxFor(m => m.stopBit, new { @Class = "form-control" })
+                </div>
+            </div>
+
+            <div class="form-group row">
+                @Html.LabelFor(m => m.baudRate, new { @Class = "col-12" })
+                <div class="col-md-12">
+                    @Html.TextBoxFor(m => m.baudRate, new { @Class = "form-control" })
+                </div>
+            </div>
+
+            <div class="form-group row">
+                @Html.LabelFor(m => m.description, new { @Class = "col-12" })
+                <div class="controls inlineblock col-md-9">
+                    @Html.TextEditorFor(m => m.description)
+                    @Html.ValidationMessageFor(m => m.description)
+                </div>
+            </div>
+
+            @{Html.RenderPartial("par_Crud");}
+
+        </div>
+    </div>
+}

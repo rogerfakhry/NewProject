@@ -1,0 +1,98 @@
+﻿
+<!doctype html>
+
+@{
+    var controller = ViewContext.RouteData.Values["controller"].ToString().ToLower();
+    var action = ViewContext.RouteData.Values["action"].ToString().ToLower();
+    var permissions = (EPermission)ViewBag.Permissions;
+}
+
+<!--[if lte IE 9]>     <html lang="en" class="no-focus lt-ie10 lt-ie10-msg"> <![endif]-->
+<!--[if gt IE 9]><!-->
+<html lang="en" class="no-focus">
+ <!--<![endif]-->
+<head id="Head1" runat="server">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0" />
+
+    <title>@("EMS - " + System.Configuration.ConfigurationManager.AppSettings["ApplicationName"] + " - " + ViewBag.Title)</title>
+
+    <meta name="description" content="Spotless" />
+    <meta name="author" content="pixelcave" />
+    <meta name="robots" content="noindex, nofollow" />
+
+    <!-- Open Graph Meta -->
+    <meta property="og:title" content="Spotless" />
+    <meta property="og:site_name" content="Spotless" />
+    <meta property="og:description" content="Spotless" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="" />
+    <meta property="og:image" content="" />
+
+    <!-- Icons -->
+    <!-- The following icons can be replaced with your own, they are used by desktop and mobile browsers -->
+    <link rel="shortcut icon" href="assets/img/favicons/favicon.png" />
+    <link rel="icon" type="image/png" sizes="192x192" href="assets/img/favicons/favicon-192x192.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="assets/img/favicons/apple-touch-icon-180x180.png" />
+    <!-- END Icons -->
+    <!-- Stylesheets -->
+    <!-- Codebase framework -->
+    <link rel="stylesheet" id="css-main" href="@Url.Content("~/assets/css/codebase.min.css")" />
+  <link rel="stylesheet" id="css-main" href="@Url.Content("~/assets/css/ems-style.css")" />
+
+    <!-- You can include a specific file from css/themes/ folder to alter the default color theme of the template. eg: -->
+    <!-- <link rel="stylesheet" id="css-theme" href="assets/css/themes/flat.min.css"> -->
+    <!-- END Stylesheets -->
+</head>
+
+<body @ViewBag.BodyAttributes=ViewBag.BodyAttributes ng-app="ems-app" ngmodelonblur=ngmodelonblur>
+    <input id="route" value="@Url.Content("~/")" type="hidden" />
+    <input id="controller" value="@controller" type="hidden" />
+    <input id="action" value="@action" type="hidden" />
+
+    <!-- Page Container -->
+    <div id="page-container" class="main-content-boxed">
+        <!-- Main Container -->
+        <main id="main-container">
+            <!-- Page Content -->
+            <div class="bg-gd-dusk">
+                <div class="hero-static content content-full bg-white invisible" data-toggle="appear">
+                    <!-- Header -->
+                    <div class="py-30 px-5 text-center">
+                        <a class="link-effect font-w700" href="@(Url.Content("~/"))">
+                            <i class="si si-fire"></i>
+                            <span class="font-size-xl text-primary-dark">Service</span><span class="font-size-xl">Control</span>
+                        </a>
+                        <h1 class="h2 font-w700 mt-50 mb-10">Welcome to Your Dashboard</h1>
+                        <h2 class="h4 font-w400 text-muted mb-0">Please sign in</h2>
+                    </div>
+                    <!-- END Header -->
+                    @RenderBody()
+                </div>
+            </div>
+            <!-- END Page Content -->
+        </main>
+        <!-- END Main Container -->
+    </div>
+    <!-- END Page Container -->
+
+
+
+
+    <!-- Codebase Core JS -->
+    <script src="@Url.Content("~/assets/js/core/jquery-1.12.3.min.js")"></script>
+    <script src="@Url.Content("~/assets/js/core/jquery.slimscroll.min.js")"></script>
+    <script src="@Url.Content("~/assets/js/core/jquery.scrollLock.min.js")"></script>
+    <script src="@Url.Content("~/assets/js/core/jquery.appear.min.js")"></script>
+    <script src="@Url.Content("~/assets/js/core/jquery.countTo.min.js")"></script>
+    <script src="@Url.Content("~/assets/js/core/popper.min.js")"></script>
+    <script src="@Url.Content("~/assets/js/core/bootstrap.min.js")"></script>
+    <script src="@Url.Content("~/assets/js/core/js.cookie.min.js")"></script>
+    <script src="@Url.Content("~/assets/js/codebase.js")"></script>
+
+
+    <script type="text/javascript" language="javascript" src="@Url.Content("~/scripts/jquery.validate.min.js")"></script>
+    <script type="text/javascript" language="javascript" src="@Url.Content("~/scripts/jquery.validate.unobtrusive.js")"></script>
+
+</body>
+</html>

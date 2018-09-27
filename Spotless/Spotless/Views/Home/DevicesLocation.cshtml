@@ -1,0 +1,254 @@
+﻿@model IEnumerable<Spotless.Models.Device>
+
+    @foreach (var entry5 in Model)
+    {
+        <div id="testDivsites@(entry5.deviceId+""+entry5.deviceGroupId)" style="display: none;">
+
+            <div id="mapBox">
+                @*<div class="pic">
+                        <img style="width:13em;" src="@Url.Content("~/MCContent/Uploads/Device/" + entry5.Image)" />
+                    </div>*@
+                <div class="details">
+                    <h1>@entry5.DeviceName </h1>
+                    <h3>Device Id : @entry5.deviceId</h3>
+                    <h3>Device Group : @entry5.DeviceGroup.title</h3>
+                    
+                    @*<label class="@(Convert.ToBoolean(entry5.isActive) ? "turnoff" : "turnon")"></label>*@
+                    @*<input name="isActive@(entry5.deviceId)" id="isActive@(entry5.deviceId)" type="checkbox" @(Convert.ToBoolean(entry5.isActive) ? "checked" : "") onchange="setTheDevice('@(entry5.id)','@(entry5.deviceId)')" />*@
+
+                    @if (Convert.ToBoolean(entry5.isConnected)) {
+                    <div class="">
+
+                        <div class="@(Convert.ToBoolean(entry5.isActive) ? "turnoff" : "turnon")"></div>
+                        <label class="css-control css-control-warning  css-control-sm css-switch">
+                            <input name="isActive@(entry5.deviceId)" id="isActive@(entry5.deviceId)" type="checkbox" @(Convert.ToBoolean(entry5.isActive) ? "checked" : "") onchange="setTheDevice('@(entry5.id)','@(entry5.deviceId)','@(entry5.deviceGroupId)',this.checked?'1':'0')" class="css-control-input">
+                            <span class="css-control-indicator"></span>
+                        </label>
+                        <a href="@(Url.Content("~/ControlDevice"))">Manage Device</a>
+                    </div>
+                    }
+                    @*<label class="@(Convert.ToBoolean(entry5.isMonitored) ? "stopmonitor" : "startmonitor")"></label>
+                        <input name="isMonitored@(entry5.deviceId)" id="isMonitored@(entry5.deviceId)" type="checkbox" @(Convert.ToBoolean(entry5.isMonitored) ? "checked" : "") onchange="setTheDeviceMonitoring('@(entry5.id)','@(entry5.deviceId)')" />*@
+                </div>
+            </div>
+        </div>
+    }
+
+    <div id="googleMap" class="col-md-12" style="min-height:400px;margin-top:2em;">
+    </div>
+    <script type="text/javascript">
+        function BeautifulAlert(message) {
+            $("#AlertMessages").html(message);
+            $("#dialog").dialog({
+                modal: true
+            });
+        }
+
+        // calc google map Height
+        var inputRagion = document.getElementById('reg');
+        var map;
+
+        var testInfoWindow;
+        var infowindow;
+        var myOptions = {
+            center: new google.maps.LatLng(33.88692186799784, 35.533215332031205),
+            zoom: 10,
+            mapTypeId: google.maps.MapTypeId.ROADMAP
+        };
+        map = new google.maps.Map(document.getElementById("googleMap"), myOptions);
+        var input = document.getElementById('Region');
+        console.log(input);
+        if (input == null) {
+            var mi = document.createElement("input");
+            mi.setAttribute('type', 'text');
+            mi.setAttribute('id', 'Region');
+            mi.setAttribute('class', 'form-control');
+            mi.setAttribute('placeholder', 'Region Search');
+            mi.setAttribute('style', 'width:54%;');
+            inputRagion.appendChild(mi);
+        }
+        var input = document.getElementById('Region');
+        var searchBox = new google.maps.places.SearchBox(input);
+        // Create the search box and link it to the UI element.
+
+        map.controls[google.maps.ControlPosition.TOP_LEFT].push(input);
+
+        // Bias the SearchBox results towards current map's viewport.
+        map.addListener('bounds_changed', function () {
+            searchBox.setBounds(map.getBounds());
+        });
+
+
+        // Listen for the event fired when the user selects a prediction and retrieve
+        // more details for that place.
+        searchBox.addListener('places_changed', function () {
+            var places = searchBox.getPlaces();
+
+            if (places.length == 0) {
+                return;
+            }
+
+            // Clear out the old markers.
+
+
+            // For each place, get the icon, name and location.
+            var bounds = new google.maps.LatLngBounds();
+            places.forEach(function (place) {
+                if (!place.geometry) {
+                    console.log("Returned place contains no geometry");
+                    return;
+                }
+                var icon = {
+                    url: place.icon,
+                    size: new google.maps.Size(71, 71),
+                    origin: new google.maps.Point(0, 0),
+                    anchor: new google.maps.Point(17, 34),
+                    scaledSize: new google.maps.Size(25, 25)
+                };
+
+
+
+
+                if (place.geometry.viewport) {
+                    // Only geocodes have viewport.
+                    bounds.union(place.geometry.viewport);
+                } else {
+                    bounds.extend(place.geometry.location);
+                }
+            });
+            map.fitBounds(bounds);
+        });
+
+        var selectedCounter = 0;
+
+        var array = new Array('@Model.Count()');
+
+        $(function () {
+            SetMakers();
+        });
+        
+        function setTheDevice(id, deviceid, deviceGroupId, mode) {
+            // var mode = $('#isActive' + deviceid).is(":checked") ? "0" : "1";
+            $.post('@(Url.Content("~/Home/SetDevice"))', "mode=" + mode + "&id=" + id + "&deviceid=" + deviceid, function (data) {
+                if (data.toString().indexOf("invalid") == -1) {
+                    if (mode == "0") {
+                        $('#isActive' + deviceid).removeAttr('checked');
+                    } else {
+                        $('#isActive' + deviceid).attr('checked', 'checked');
+                    }
+                    BeautifulAlert(mode == "0" ? "successfully turned off" : "successfully turned on");
+                    window["markersites" + id].setIcon(array[parseInt(mode) == 0 ? 0 : 1]);
+                    var newClassName = mode == "0" ? "turnon" : "turnoff";
+                    $($('#isActive' + deviceid).parents('div.details').find('div').eq(1)).attr('class', newClassName);
+                    if (infowindow != null && infowindow != "undefined") {
+                        infowindow.close();
+                        var content1 = $('#testDivsites' + deviceid + "" + deviceGroupId);
+                        infowindow.setContent(content1.html());
+                        infowindow.open(map, window['markersites' + id]);
+                    }
+                } else {
+                    BeautifulAlert("something went wrong please try again");
+                    if (mode == "0") {
+                        $('#isActive' + deviceid).attr('checked', 'checked');
+                    } else {
+                        $('#isActive' + deviceid).removeAttr('checked');
+                    }
+                    var newClassName = mode == "0" ? "turnoff" : "turnon";
+                    $($('#isActive' + deviceid).parents('div.details').find('div').eq(0)).attr('class', newClassName);
+                    window["markersites" + id].setIcon(array[parseInt(mode) == 0 ? 1 : 0]);
+                    if (infowindow != null && infowindow != "undefined") {
+                        infowindow.close();
+                        var content1 = $('#testDivsites' + deviceid + "" + deviceGroupId);
+                        infowindow.setContent(content1.html());
+                        infowindow.open(map, window['markersites' + id]);
+                    }
+                }
+            })
+        }
+        function setTheDeviceMonitoring(id, deviceid, deviceGroupId) {
+            var mode = $('#isMonitored' + deviceid).is(":checked") ? "0" : "1";
+            $.post('@(Url.Content("~/Home/SetDeviceMonitor"))', "mode=" + mode + "&id=" + id + "&deviceid=" + deviceid, function (data) {
+                if (data.toString().indexOf("invalid") == -1) {
+                    if (mode == "0") {
+                        $('#isMonitored' + deviceid).removeAttr('checked');
+                    } else {
+                        $('#isMonitored' + deviceid).attr('checked', 'checked');
+                    }
+                    BeautifulAlert(mode == "0" ? "successfully stoped monitoring" : "successfully started monitoring");
+                    var newClassName = mode == "0" ? "startmonitor" : "stopmonitor";
+                    console.log($($('#isMonitored' + deviceid).parents('div.details').find('label').eq(1)));
+                    $($('#isMonitored' + deviceid).parents('div.details').find('label').eq(1)).attr('class', newClassName);
+                    if (infowindow != null && infowindow != "undefined") {
+                        infowindow.close();
+                        var content1 = $('#testDivsites' + deviceid + "" + deviceGroupId);
+                        infowindow.setContent(content1.html());
+                        infowindow.open(map, window['markersites' + id]);
+                    }
+                } else {
+                    BeautifulAlert("something went wrong please try again");
+                    if (mode == "0") {
+                        $('#isMonitored' + deviceid).attr('checked', 'checked');
+                    } else {
+                        $('#isMonitored' + deviceid).removeAttr('checked');
+                    }
+                    var newClassName = mode == "0" ? "stopmonitor" : "startmonitor";
+                    $($('#isMonitored' + deviceid).parents('div.details').find('label').eq(1)).attr('class', newClassName);
+                    if (infowindow != null && infowindow != "undefined") {
+                        infowindow.close();
+                        var content1 = $('#testDivsites' + deviceid + "" + deviceGroupId);
+                        infowindow.setContent(content1.html());
+                        infowindow.open(map, window['markersites' + id]);
+                    }
+                }
+            })
+        }
+        
+        
+        function SetMakers() {
+            
+
+            var counter = 0;
+            var typeCounter = 0;
+            array[0] = "/MCContent/emsimages/bulb.png";
+
+            array[1] = "/MCContent/emsimages/light bulb.png";
+            array[2] = "/MCContent/emsimages/light_not_connected.png";
+            var bounds = new google.maps.LatLngBounds();
+            @{
+               
+                var result = "";
+                var doubleAnd = "&&";
+          }
+            @foreach (var entry in Model)
+            {
+                WriteLiteral(@"var latitude" + entry.deviceId + @"= parseFloat(" + entry.Latitude + @");var longitude" + entry.deviceId + @"= parseFloat(" + entry.Longitude + @");window['markersites'+" + entry.id + @"] = new google.maps.Marker({
+                        map: map,
+                        draggable: false,
+                        icon : array[" + ((Convert.ToBoolean(entry.isActive) && Convert.ToBoolean(entry.isConnected)) ? "1" : (!Convert.ToBoolean(entry.isActive) && Convert.ToBoolean(entry.isConnected))?"0": "2") + @"],
+                        position: new google.maps.LatLng(latitude" + entry.deviceId + @", longitude" + entry.deviceId + @") });
+                        counter++;
+                        bounds.extend(window['markersites'+" + entry.id + @"].position);
+                        if (infowindow != null && infowindow != ""undefined""){
+                        infowindow.close();
+                        }
+                        infowindow = new google.maps.InfoWindow();
+                        google.maps.event.addListener(window['markersites'+" + entry.id  + @"],'click',function(overlay,point){
+                        var content1 = $('#testDivsites' + '" + entry.deviceId + "" + entry.deviceGroupId + @"');
+                        infowindow.setContent(content1.html());
+                        infowindow.open(map, window['markersites'+" + entry.id  + @"]);
+                        });");
+
+                
+            }
+            
+            map.fitBounds(bounds);
+        }
+
+
+
+
+
+
+    </script>
+
+

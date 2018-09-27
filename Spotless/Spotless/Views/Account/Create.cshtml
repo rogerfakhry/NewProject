@@ -1,0 +1,76 @@
+﻿@model Spotless.Models.RegisterModel
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+    @using (Html.BeginForm())
+    {
+        @Html.AntiForgeryToken()
+
+
+        <div class="errors-section">
+            @Html.ValidationSummary(true, "Something went wrong, please retry!")
+        </div>
+        <div class="block">
+            <div class="block-header block-header-default">
+                <h3 class="block-title">Create User</h3>
+            </div>
+            <div class="block-content">
+                <div class="field-container">
+                    @*            @{Html.RenderPartial("par_Publish");}*@
+
+
+
+                    <div class="form-group row">
+                        @Html.LabelFor(m => m.UserName, new { @Class = "col-12" })
+                        <div class="controls inlineblock  col-md-12">
+                            @Html.TextBoxFor(m => m.UserName, new { @Class = "form-control" })
+                            @Html.ValidationMessageFor(m => m.UserName)
+                        </div>
+                    </div>
+
+                    @*            <div class="col-md-12">
+                            <input type="text" class="form-control" id="example-text-input" name="example-text-input" placeholder="Text..">
+                            <div class="form-text text-muted">Further info about this input</div>
+                        </div>*@
+
+                    <div class="form-group row">
+                        @Html.LabelFor(m => m.Password, new { @Class = "col-12" })
+                        <div class="controls inlineblock  col-md-12">
+                            @Html.PasswordFor(m => m.Password, new { @Class = "form-control" })
+                            @Html.ValidationMessageFor(m => m.Password)
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        @Html.LabelFor(m => m.ConfirmPassword, new { @Class = "col-12" })
+                        <div class="controls inlineblock  col-md-12">
+                            @Html.PasswordFor(m => m.ConfirmPassword, new { @Class = "form-control" })
+                            @Html.ValidationMessageFor(m => m.ConfirmPassword)
+                        </div>
+                    </div>
+
+
+                    <div class="form-group row">
+                        @Html.Label("Customer", new { @Class = "col-12" })
+                        <div class="col-md-12">
+                            @Html.DropDownListFor(m => m.customerId, (SelectList)ViewBag.Customers, "select your customer", new { @Class = "form-control" })
+                            @Html.ValidationMessageFor(m => m.customerId)
+                        </div>
+                    </div>
+
+                    <div class="form-group row">
+                        @Html.LabelFor(m => m.Roles, new { @Class = "col-12" })
+                        <div class="controls inlineblock  col-md-12">
+                            @Html.ListBoxFor(m => m.Roles, (MultiSelectList)ViewBag.Roles, new { @Class = "form-control" })
+                            @Html.ValidationMessageFor(m => m.Roles)
+                        </div>
+                    </div>
+                    <div class="sub-header-buttons">
+                        @{Html.RenderPartial("par_Crud");}
+                    </div>
+                </div>
+            </div>
+        </div>
+                            }
+            

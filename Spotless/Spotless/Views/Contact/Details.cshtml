@@ -1,0 +1,59 @@
+﻿@model Spotless.Models.Contact
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@using (Html.BeginForm())
+{
+
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(m => m.id)
+
+    <div class="errors-section">
+        @Html.ValidationSummary(true, "Something went wrong, please retry!")
+    </div>
+
+    <div class="block">
+        <div class="block-header block-header-default">
+            <h3 class="block-title">Contact </h3>
+        </div>
+        <div class="block-content">
+            <div class="form-group row">
+                @Html.LabelFor(m => m.fullName, new { @Class = "col-12" })
+                <div class="col-md-12">
+                    @Html.TextBoxFor(m => m.fullName, new { @Class = "form-control" })
+                    @Html.ValidationMessageFor(m => m.fullName)
+                </div>
+            </div>
+
+
+            <div class="form-group row">
+                @Html.LabelFor(m => m.mobile, new { @Class = "col-12" })
+                <div class="col-md-12">
+                    @Html.TextBoxFor(m => m.mobile, new { @Class = "form-control" })
+                    @Html.ValidationMessageFor(m => m.mobile)
+                </div>
+            </div>
+
+            <div class="form-group row">
+                @Html.LabelFor(m => m.email, new { @Class = "col-12" })
+                <div class="col-md-12">
+                    @Html.TextBoxFor(m => m.email, new { @Class = "form-control" })
+                    @Html.ValidationMessageFor(m => m.email)
+                </div>
+            </div>
+
+
+            <div class="form-group row">
+                @Html.LabelFor(m => m.comment, new { @Class = "col-12" })
+                <div class="controls inlineblock">
+                    @Html.TextEditorFor(m => m.comment)
+                    @Html.ValidationMessageFor(m => m.comment)
+                </div>
+            </div>
+
+            @{Html.RenderPartial("par_Crud");}
+
+        </div>
+    </div>
+                }

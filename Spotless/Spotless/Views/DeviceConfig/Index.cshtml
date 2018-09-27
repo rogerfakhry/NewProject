@@ -1,0 +1,114 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var controller = ViewContext.RouteData.Values["controller"].ToString().ToLower();    
+    var permissions = (EPermission)ViewBag.Permissions;
+    var Logged_User = (UserProfile)ViewBag.LoggedUser;
+    var isAdmin = true;
+    var currentRoles = Roles.GetRolesForUser(Logged_User.UserName);
+    if (!currentRoles.Contains(ConfigurationManager.AppSettings["SuperAdminRoleName"]) && !currentRoles.Contains(ConfigurationManager.AppSettings["AdminRoleName"]))
+    {
+        isAdmin = false;
+    }
+}
+<script>
+    $(function () {
+        $(".k-grid-excel").click(function (e) {
+            // Prevent the default behavior which will prompt the user to save the generated file.
+            e.preventDefault();
+            // Get the Excel file as a data URL.
+            console.log('test');
+            var dataURL = new kendo.ooxml.Workbook(e.workbook).toDataURL();
+            // Strip the data URL prologue.
+            var base64 = dataURL.split(";base64,")[1];
+            // Post the base64 encoded content to the server which can save it.
+            $.post("Device/Excel_Export_Save", {
+                base64: base64,
+                fileName: "ExcelExport.xlsx"
+            }
+            , function (data) {
+                var url = 'data:application/vnd.ms-excel,' + encodeURIComponent(data);
+                location.href = url;
+                return false;
+            });
+        });
+    });
+</script>
+    <div class='grid-table'>
+
+    @{Html.Kendo().Grid<Device>()
+                                      .Name("grid")
+                                      .Columns(columns =>
+                                      {
+                                          columns.Bound(c => c.id).Visible(false);
+                                          columns.Bound(c => c.deviceId);
+                                          //columns.Bound(c => c.customer_name).Visible(isAdmin).Title("Customer Name");
+                                          columns.Bound(c => c.DeviceListingOfGroup).Title("Device Groups");
+                                          columns.Bound(c => c.isActive).ClientTemplate("#=isActive?'Yes':'No'#").Title("Active");
+                                          columns.Bound(c => c.isMonitored).ClientTemplate("#=isMonitored?'Yes':'No'#").Title("Monitored");
+                                      columns.Command(c =>
+                                          {
+                                              if (permissions.CanUpdate)
+                                              {
+                                                  c.Custom("edit").Text("Edit").HtmlAttributes(new { @onclick = "GoToUpdatePage($(this),event)" });
+                                              }
+                                              if (permissions.CanDelete)
+                                              {
+                                                  c.Destroy();
+                                              }
+                                          }).Width(172);
+                                      })
+                                      .ToolBar(toolbar =>
+                                      {
+                                          if (permissions.CanCreate)
+                                          {
+                                              toolbar.Template(
+                                                @<text><a class="k-button k-button-icontext k-grid-excel" href="#"><span class="k-icon k-i-excel"></span>Export to Excel</a><a class="k-button k-button-icontext" href="@Url.Content("~/" + controller + "/create")">
+                                                        <span class="k-icon k-add"></span>
+                                                        Add new record
+                                                    </a></text>
+                    );
+                                          }
+                                          else{
+                                                                        toolbar.Template(
+                                                @<text><a class="k-button k-button-icontext k-grid-excel" href="#"><span class="k-icon k-i-excel"></span>Export to Excel</a></text>
+);
+                                          }
+                                      })
+            .HtmlAttributes(new { @Class = "grid" + (permissions.CanSort ? " issortable" : "") })
+        .Filterable()
+        .Scrollable()
+        .Sortable()
+                .Excel(excel => excel
+        .FileName("Report.xlsx")
+        .Filterable(true)
+        .ProxyURL(Url.Action("Excel_Export_Save", "Device"))
+        .ForceProxy(true)
+        )
+        .Pageable(pageable => pageable
+            .Refresh(true)
+            .ButtonCount(5))
+        .DataSource(dataSource => dataSource
+            .Ajax()
+            .AutoSync(true)
+            .PageSize(20)
+            .ServerOperation(true)
+            .Model(model => model.Id(p => p.id))
+            .Destroy("Delete", "Device")
+            .Read("ReadData", "Device")
+        ).Render();
+    }
+    @if (permissions.CanSort)
+    {
+        @(Html.Kendo().Sortable()
+            .For(".grid")
+            .Filter("table > tbody > tr")
+            .Cursor("move")
+            .HintHandler("noHint")
+            .PlaceholderHandler("SortPlaceholder")
+            .ContainerSelector(".grid tbody")
+            .Events(events => events.Change("OnSortChange"))
+        )
+
+    }
+</div> 
+

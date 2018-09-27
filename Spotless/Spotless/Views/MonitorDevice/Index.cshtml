@@ -1,0 +1,419 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var controller = ViewContext.RouteData.Values["controller"].ToString().ToLower();
+    var permissions = (EPermission)ViewBag.Permissions;
+    var Logged_User = (UserProfile)ViewBag.LoggedUser;
+    var isAdmin = true;
+    var currentRoles = Roles.GetRolesForUser(Logged_User.UserName);
+    if (!currentRoles.Contains(ConfigurationManager.AppSettings["SuperAdminRoleName"]) && !currentRoles.Contains(ConfigurationManager.AppSettings["AdminRoleName"]))
+    {
+        isAdmin = false;
+    }
+}
+<script>
+    $(function () {
+        $(".k-grid-excel").click(function (e) {
+            // Prevent the default behavior which will prompt the user to save the generated file.
+            e.preventDefault();
+            // Get the Excel file as a data URL.
+            console.log('test');
+            var dataURL = new kendo.ooxml.Workbook(e.workbook).toDataURL();
+            // Strip the data URL prologue.
+            var base64 = dataURL.split(";base64,")[1];
+            // Post the base64 encoded content to the server which can save it.
+            $.post("Device/Excel_Export_Save", {
+                base64: base64,
+                fileName: "ExcelExport.xlsx"
+            }
+            , function (data) {
+                var url = 'data:application/vnd.ms-excel,' + encodeURIComponent(data);
+                location.href = url;
+                return false;
+            });
+        });
+    });
+    //window.onload = function myFunction() {
+    //    var x = document.getElementsByClassName("collapse");
+    //    x.collapse("toggle")
+    //    alert("I am an alert box!");
+    //};
+</script>
+<div class="container w-100">
+    <div class="panel-group row w-100" id="accordion">
+
+        <div class="panel panel-default col-sm-4 mt-1">
+            <div class="panel-heading">
+                <h4 class="panel-title">
+                    <a data-toggle="collapse" href="#collapse1">PV Info:</a>
+                </h4>
+            </div>
+            <div id="collapse1" class="w100 collapsed collapse show">
+                <div class="panel-body">
+                    <div class="form-group">
+                        <label for="PV_Voltage">PV Voltage(V):</label>
+                        <input name="Monitor0" id="PV_Voltage" class="form-control" type="text" />
+
+                    </div>
+                    <div class="form-group">
+                        <label for="PV_Voltage">PV Current(A):</label>
+                        <input name="Monitor1" id="PV_Current" type="text" class="form-control" />
+                    </div>
+                    <div class="form-group">
+                        <label for="PV_Power">PV Power(W):</label>
+                        <input name="Monitor2" id="PV_Power" type="text" class="form-control" />
+                    </div>
+                    <div class="form-group">
+                        <label for="Max_Voltage">Max. Voltage(V):</label>
+                        <input name="Monitor3" id="Max_Voltage" type="text" class="form-control" />
+                    </div>
+                    <div class="form-group">
+                        <label for="Min_Voltage">Min. Voltage (V):</label>
+                        <input name="Monitor4" id="Min_Voltage" type="text" class="form-control" />
+                    </div>
+                    <div class="form-group">
+                        <label for="PV_State">PV State:</label>
+                        <input name="Monitor5" id="PV_State" type="text" class="form-control" />
+                    </div>
+                    <div class="form-group">
+                        <label for="Power_State">Power State:</label>
+                        <input name="Monitor6" id="Power_State" type="text" class="form-control" />
+                    </div>
+                    <div class="form-group">
+                        <label for="Day_or_Night">Day or Night:</label>
+                        <input name="Monitor7" id="Day_or_Night" type="text" class="form-control" />
+                    </div>
+                    <div class="form-group">
+                        <label for="Charging_State">Charging State:</label>
+                        <input name="Monitor8" id="Charging_State" type="text" class="form-control" />
+                    </div>
+                    <div class="form-group">
+                        <label for="Charging_Mode">Charging Mode:</label>
+                        <input name="Monitor9" id="Charging_Mode" type="text" class="form-control" />
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="panel panel-default col-sm-4 mt-1">
+            <div class="panel-heading">
+                <h4 class="panel-title">
+                    <a data-toggle="collapse" href="#collapse2">Electricity Info:</a>
+                </h4>
+            </div>
+            <div id="collapse2" class="w-100 collapsed collapse show">
+                <div class="panel-body">
+                    <div class="form-group">
+                        <label for="Module_Voltage">Module Voltage(V):</label>
+                        <input name="Monitor10" id="Module_Voltage" class="form-control" type="text" />
+
+                    </div>
+                    <div class="form-group">
+                        <label for="Charge_Current">Charge Current(A):</label>
+                        <input name="Monitor11" id="Charge_Current" type="text" class="form-control" />
+                    </div>
+                    <div class="form-group">
+                        <label for="Charge_Power">Charge Power(W):</label>
+                        <input name="Monitor12" id="Charge_Power" class="form-control" type="text" />
+
+                    </div>
+                    <div class="form-group">
+                        <label for="State">State:</label>
+                        <input name="Monitor13" id="State" type="text" class="form-control" />
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="panel panel-default col-sm-4 mt-1">
+            <div class="panel-heading">
+                <h4 class="panel-title">
+                    <a data-toggle="collapse" href="#collapse3"> Battery Info:</a>
+                </h4>
+            </div>
+            <div id="collapse3" class="w-100 collapsed collapse show">
+                <div class="panel-body">
+                    <div class="form-group">
+                        <label for="BA_Voltage">BA Voltage(V):</label>
+                        <input name="Monitor14" id="BA_Voltage" class="form-control" type="text" />
+
+                    </div>
+                    <div class="form-group">
+                        <label for="BA_Charge_Current">BA Charge Current(A):</label>
+                        <input name="Monitor15" id="BA_Charge_Current" type="text" class="form-control" />
+                    </div>
+                    <div class="form-group">
+                        <label for="BA_SOC">BA SOC(%):</label>
+                        <input name="Monitor16" id="BA_SOC" class="form-control" type="text" />
+
+                    </div>
+                    <div class="form-group">
+                        <label for="ba_Max_Voltage">Max. Voltage(V):</label>
+                        <input name="Monitor17" id="ba_Max_Voltage" type="text" class="form-control" />
+                    </div>
+                    <div class="form-group">
+                        <label for="BA_Min_Voltage">Min. Voltage (V):</label>
+                        <input name="Monitor18" id="BA_Min_Voltage" class="form-control" type="text" />
+
+                    </div>
+                    <div class="form-group">
+                        <label for="Battery_State">Battery State:</label>
+                        <input name="Monitor19" id="Battery_State" type="text" class="form-control" />
+                    </div>
+                    <div class="form-group">
+                        <label for="Temp_tate">Temp. State:</label>
+                        <input name="Monitor20" id="Temp_tate" class="form-control" type="text" />
+
+                    </div>
+                    <div class="form-group">
+                        <label for="Low_Temp">Low Temp.:</label>
+                        <input name="Monitor21" id="Low_Temp" type="text" class="form-control" />
+                    </div>
+
+
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="panel-group row w-100" id="accordion1">
+
+        <div class="panel panel-default col-sm-4 mt-1">
+            <div class="panel-heading">
+                <h4 class="panel-title">
+                    <a data-toggle="collapse" href="#collapse4">Temperature Info:</a>
+                </h4>
+            </div>
+            <div id="collapse4" class="w-100 collapsed collapse show">
+
+                <div class="panel-body">
+                    <div class="form-group">
+                        <label for="Controller_Temp">Controller Temp.(&#8451):</label>
+                        <input name="Monitor22" id="Controller_Temp" class="form-control" type="text" />
+
+                    </div>
+                    <div class="form-group">
+                        <label for="Battery_Temp">Battery Temp.(&#8451):</label>
+                        <input name="Monitor23" id="Battery_Temp" type="text" class="form-control" />
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="panel panel-default col-sm-4 mt-1">
+            <div class="panel-heading">
+                <h4 class="panel-title">
+                    <a data-toggle="collapse" href="#collapse5">Statistics:</a>
+                </h4>
+            </div>
+            <div id="collapse5" class="w-100 collapsed collapse show">
+
+                <div class="panel-body">
+                    <div class="btn-alt-primary btn w-100 ">
+                        <h4 class="panel-title">
+                            <a data-toggle="collapse" href="#Daycollapse">Day Statistics:</a>
+                        </h4>
+                    </div>
+                    <div class="row w100 container" id="Daycollapse">
+                        <div class="form-group">
+                            <label for="Generation">Generation (KWh):</label>
+                            <input name="Monitor23" id="Generation" class="form-control " type="text" />
+
+                        </div>
+                        <div class="form-group">
+                            <label for="Day_Consumption">Consumption (KWh):</label>
+                            <input name="Monitor24" id="Day_Consumption" type="text" class="form-control" />
+                        </div>
+                    </div>
+                    <div class="btn-alt-primary btn w-100">
+                        <h4 class="panel-title">
+                            <a data-toggle="collapse" href="#Monthcollapse">Month Statistics:</a>
+                        </h4>
+                    </div>
+                    <div class="row w100 container" id="Monthcollapse">
+                        <div class="form-group">
+                            <label for="Month_Generation">Generation (KWh):</label>
+                            <input name="Monitor25" id="Month_Generation" class="form-control" type="text" />
+
+                        </div>
+                        <div class="form-group">
+                            <label for="Month_Consumption">Consumption (KWh):</label>
+                            <input name="Monitor26" id="Month_Consumption" type="text" class="form-control" />
+                        </div>
+                    </div>
+                    <div class="btn-alt-primary btn w-100">
+                        <h4 class="panel-title">
+                            <a data-toggle="collapse" href="#yearcollapse">Year Statistics:</a>
+                        </h4>
+                    </div>
+                    <div class="row w100 container" id="yearcollapse">
+                        <div class="form-group">
+                            <label for="Year_Generation">Generation (KWh):</label>
+                            <input name="Monitor27" id="Year_Generation" class="form-control" type="text" />
+
+                        </div>
+                        <div class="form-group">
+                            <label for="Year_Consumption">Consumption (KWh):</label>
+                            <input name="Monitor28" id="Year_Consumption" type="text" class="form-control" />
+                        </div>
+                    </div>
+                    <div class="btn-alt-primary btn w-100">
+                        <h4 class="panel-title">
+                            <a data-toggle="collapse" href="#totalcollapse">Total Statistics:</a>
+                        </h4>
+                    </div>
+                    <div class="row collapse panel-collapse container" id="totalcollapse">
+                        <div class="form-group">
+                            <label for="Toltal_Generation">Generation (KWh):</label>
+                            <input name="Monitor29" id="Toltal_Generation" class="form-control" type="text" />
+
+                        </div>
+                        <div class="form-group">
+                            <label for="Toltal_Consumption">Consumption (KWh):</label>
+                            <input name="Monitor30" id="Toltal_Consumption" type="text" class="form-control" />
+                        </div>
+                    </div>
+
+
+                </div>
+            </div>
+        </div>
+
+        <div class="panel panel-default col-sm-4 mt-1">
+            <div class="panel-heading">
+                <h4 class="panel-title">
+                    <a data-toggle="collapse" href="#collapse6">Load Info:</a>
+                </h4>
+            </div>
+            <div id="collapse6" class="w-100 collapsed collapse show">
+                <div class="panel-body">
+                    <div class="btn-alt-primary btn w-100">
+                        <h4 class="panel-title">
+                            <a data-toggle="collapse" href="#load1collapse">load1</a>
+                        </h4>
+                    </div>
+                    <div class="w-100 collapsed collapse show" id="load1collapse">
+                        <div class="form-group">
+                            <label for="Load1_Voltage">Load1 Voltage (V):</label>
+                            <input name="Monitor31" id="Load1_Voltage" class="form-control" type="text" />
+
+                        </div>
+                        <div class="form-group">
+                            <label for="Load1_Current">Load1 Current (mA):</label>
+                            <input name="Monitor32" id="Load1_Current" type="text" class="form-control" />
+                        </div>
+                        <div class="form-group">
+                            <label for="Load1_Power">Load1 Power(W):</label>
+                            <input name="Monitor33" id="Load1_Power" class="form-control" type="text" />
+
+                        </div>
+                    </div>
+                    <div class="btn-alt-primary btn w-100">
+                        <h4 class="panel-title">
+                            <a data-toggle="collapse" href="#load2collapse">load2</a>
+                        </h4>
+                    </div>
+                    <div class="w-100 collapsed collapse show" id="load2collapse">
+                        <div class="form-group">
+                            <label for="Load2_State">Load2 State:</label>
+                            <input name="Monitor34" id="Load2_State" type="text" class="form-control" />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="Load2_Voltage">Load2 Voltage (V):</label>
+                            <input name="Monitor35" id="Load2_Voltage" class="form-control" type="text" />
+
+                        </div>
+                        <div class="form-group">
+                            <label for="Load2_Current">Load2 Current (mA):</label>
+                            <input name="Monitor36" id="Load2_Current" type="text" class="form-control" />
+                        </div>
+                        <div class="form-group">
+                            <label for="Load2_Power">Load2 Power(W):</label>
+                            <input name="Monitor37" id="Load2_Power" class="form-control" type="text" />
+
+                        </div>
+                        <div class="form-group">
+                            <label for="Load2_State">Load2 State:</label>
+                            <input name="Monitor38" id="Load2_State" type="text" class="form-control" />
+                        </div>
+                    </div>
+                    <div class="btn-alt-primary btn w-100">
+                        <h4 class="panel-title">
+                            <a data-toggle="collapse" href="#load3collapse">load3</a>
+                        </h4>
+                    </div>
+                    <div class="w-100 collapsed collapse show" id="load3collapse">
+                        <div class="form-group">
+                            <label for="Load3_State">Load3 State:</label>
+                            <input name="Monitor39" id="Load3_State" type="text" class="form-control" />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="Load3_Voltage">Load3 Voltage (V):</label>
+                            <input name="Monitor40" id="Load3_Voltage" class="form-control" type="text" />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="Load3_Current">Load3 Current (mA):</label>
+                            <input name="Monitor41" id="Load3_Current" type="text" class="form-control" />
+                        </div>
+                        <div class="form-group">
+                            <label for="Load3_Power">Load3 Power(W):</label>
+                            <input name="Monitor42" id="Load3_Power" class="form-control" type="text" />
+
+                        </div>
+                        <div class="form-group">
+                            <label for="Load3_State">Load3 State:</label>
+                            <input name="Monitor43" id="Load3_State" type="text" class="form-control" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="panel-group row w-100" id="accordion1">
+
+        <div class="panel panel-default col-sm-12 mt-1">
+            <div class="panel-heading">
+                <h4 class="panel-title">
+                    <a data-toggle="collapse" href="#collapse40">Monitor:</a>
+                </h4>
+            </div>
+            <div id="collapse40" class="w-100 collapsed collapse show">
+
+                <div class="panel-body">
+                    <div class="form-group">
+                        <label for="Adress">Adress :</label>
+                        <input name="Monitor44" id="Adress" class="form-control" type="text" />
+
+                    </div>
+                    <div class="form-group">
+                        <div class="w-100">
+                            <div class="container w-100">
+
+                                <div class="col-sm-3 mb-2">
+                                    <button name="Monitor45" class="btn btn-primary" id="btn_Start_Monitoring">Start Monitoring</button>
+                                </div>
+                                <div class="col-sm-3 mb-2">
+                                    <input name="Monitor46" id="Start_Monitoring" class="form-control" type="text" />
+                                </div>
+                                <div class="col-sm-3 mb-2">
+                                    <button name="Monitor47" class="btn btn-primary" id="btn_Stop_Monitoring">Stop Monitoring</button>
+                                </div>
+                                <div class="col-sm-3 mb-2">
+                                    <input name="Monitor48" id="Stop_Monitoring" class="form-control " type="text" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+<style>
+    .panel-group .panel {
+        padding-left:initial;
+        padding-right:initial;
+    }
+</style>
+

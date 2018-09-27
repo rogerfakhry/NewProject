@@ -1,0 +1,53 @@
+﻿@model Spotless.Models.RegisterModel
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="sub-content-container">
+    @using (Html.BeginForm())
+    {
+        @Html.AntiForgeryToken()
+
+        <div class="sub-header-buttons">
+            @{Html.RenderPartial("par_Crud");}
+        </div>
+
+        <div class="errors-section">
+            @Html.ValidationSummary(true, "Something went wrong, please retry!")
+        </div>
+
+        <div class="field-container">
+            @{Html.RenderPartial("par_Publish");}
+
+            <div class="control-group">
+                @Html.LabelFor(m => m.UserName, new { @Class = "control-label inlineblock" })
+                <div class="controls inlineblock">
+                    @Html.TextBoxFor(m => m.UserName)
+                    @Html.ValidationMessageFor(m => m.UserName)
+                </div>
+            </div>
+            <div class="control-group">
+                @Html.LabelFor(m => m.Password, new { @Class = "control-label inlineblock" })
+                <div class="controls inlineblock">
+                    @Html.PasswordFor(m => m.Password)
+                    @Html.ValidationMessageFor(m => m.Password)
+                </div>
+            </div>
+            <div class="control-group">
+                @Html.LabelFor(m => m.ConfirmPassword, new { @Class = "control-label inlineblock" })
+                <div class="controls inlineblock">
+                    @Html.PasswordFor(m => m.ConfirmPassword)
+                    @Html.ValidationMessageFor(m => m.ConfirmPassword)
+                </div>
+            </div>
+
+            <div class="control-group">
+                @Html.LabelFor(m => m.Roles, new { @Class = "control-label inlineblock" })
+                <div class="controls inlineblock">
+                    @Html.ListBoxFor(m => m.Roles, (MultiSelectList)ViewBag.Roles, new { @Style = "height:250px;" })
+                </div>
+            </div>
+
+        </div>
+    }
+</div>

@@ -1,0 +1,59 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var controller = ViewContext.RouteData.Values["controller"].ToString().ToLower();    
+    var permissions = (EPermission)ViewBag.Permissions;  
+}
+
+<div class="sub-content-container kgrid">
+    <div class='grid-table'>
+        @{Html.Kendo().Grid<webpages_Role>()
+        .Name("grid")
+        .Columns(columns =>
+        {
+            columns.Bound(c => c.RoleId).Visible(false);
+            columns.Bound(c => c.RoleName);
+            columns.Command(c =>
+            {
+                if (permissions.CanUpdate)
+                {
+                    c.Custom("edit").Text("Edit").HtmlAttributes(new { @onclick = "GoToUpdatePage($(this),event)" });
+                }
+                if (permissions.CanDelete)
+                {
+                    c.Destroy();
+                }
+            }).Width(172);
+        })
+        .ToolBar(toolbar =>
+            {
+                if (permissions.CanCreate)
+                {
+                    toolbar.Template(
+                        @<text><a class="k-button k-button-icontext" href="@Url.Content("~/" + controller + "/create")">
+                            <span class="k-icon k-add"></span>
+                            Add new record
+                        </a></text>
+                    );
+                }
+            })
+        .HtmlAttributes(new { @Class = "grid" })
+        .Filterable()
+        .Scrollable()
+        .Sortable()
+        .Pageable(pageable => pageable
+            .Refresh(true)
+            .ButtonCount(5))
+        .DataSource(dataSource => dataSource
+            .Ajax()
+            .AutoSync(true)
+            .PageSize(20)
+            .ServerOperation(true)
+            .Model(model => model.Id(p => p.RoleId))
+            .Destroy("Delete", "Role")
+            .Read("ReadData", "Role")
+        ).Render();
+        }
+
+
+    </div>
+</div>

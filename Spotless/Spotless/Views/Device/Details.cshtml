@@ -1,0 +1,185 @@
+﻿@model Spotless.Models.Device
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var Logged_User = (UserProfile)ViewBag.LoggedUser;
+    var isAdmin = true;
+    var currentRoles = Roles.GetRolesForUser(Logged_User.UserName);
+    if (!currentRoles.Contains(ConfigurationManager.AppSettings["SuperAdminRoleName"]) && !currentRoles.Contains(ConfigurationManager.AppSettings["AdminRoleName"]))
+    {
+        isAdmin = false;
+    }
+}
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(m => m.id)
+
+    if (!isAdmin)
+    {
+        //@Html.HiddenFor(m => m.customerId, new { @Value = Logged_User.customerId})
+    }
+
+    <script>
+        var firstTime = false;
+        var counter = 0; //#Image
+
+        $(function () {
+            $('input[type="file"]').change(function (event) {
+                counter++;
+                if (counter == 1)
+                    firstTime = true;
+                else {
+                    firstTime = false;
+                }
+
+                $('#Image').trigger('change');
+            });
+            $('#Image').change(function () {
+                if ($('#Image').val() != '' || firstTime) {
+                    $('button[type="submit"]').parents('.form-group').css('margin-top', '10em');
+                }
+            });
+
+        });
+
+        function handlePosition(position) {
+            $("#googleMapLat").val(position.coords.latitude);
+            $("#googleMapLong").val(position.coords.longitude);
+
+        }
+
+        $(document).ready(function () {
+            setTimeout(() => {
+            if (navigator.geolocation) {
+                @if (Model == null) {
+                    WriteLiteral("navigator.geolocation.getCurrentPosition(handlePosition);");
+                }
+
+            } else {
+                x.innerHTML = "Geolocation is not supported by this browser.";
+            }
+            }, 200);
+        });
+
+
+        function PinLocation() {
+            navigator.geolocation.getCurrentPosition(handlePosition);
+            getLocation();
+        }
+    </script>
+    <div class="errors-section">
+        @Html.ValidationSummary(true, "Something went wrong, please retry!")
+    </div>
+
+
+    <div class="block">
+        <div class="block-header block-header-default">
+            <h3 class="block-title">Device</h3>
+        </div>
+
+        <div class="block-content">
+            <div class="form-group row">
+                @Html.LabelFor(m => m.DeviceName, new { @Class = "col-12" })
+                <div class="col-md-12">
+                    @Html.TextBoxFor(m => m.DeviceName, new { @Class = "form-control" })
+                    @Html.ValidationMessageFor(m => m.DeviceName)
+                </div>
+            </div>
+
+            @*<div class="form-group row">
+                    @Html.LabelFor(m => m.comPort, new { @Class = "col-12" })
+                    <div class="col-md-12">
+                        @Html.TextBoxFor(m => m.comPort, new { @Class = "form-control" })
+                        @Html.ValidationMessageFor(m => m.comPort)
+                    </div>
+                </div>*@
+
+            <label class="custom-control custom-checkbox">
+                @Html.CheckBox("isActive", (Model != null && Model.isActive.HasValue) ? Model.isActive.Value : false, new { @Class = "custom-control-input" })
+                <span class="custom-control-indicator"></span>
+                @Html.LabelFor(m => m.isActive, new { @Class = "custom - control - description" })
+                @Html.ValidationMessageFor(m => m.isActive)
+            </label>
+            <label class="custom-control custom-checkbox">
+                @Html.CheckBoxFor(m => m.isMonitored, new { @Class = "custom-control-input" })
+                <span class="custom-control-indicator"></span>
+                @Html.Label("Monitored ?", new { @Class = "custom - control - description" })
+                @Html.ValidationMessageFor(m => m.isMonitored)
+            </label>
+            <div class="form-group row">
+                @Html.Label("Device ID", new { @Class = "col-12" })
+                <div class="col-md-12">
+                    @Html.TextBoxFor(m => m.deviceId, new { @Class = "form-control" })
+                    @Html.ValidationMessageFor(m => m.deviceId)
+                </div>
+            </div>
+
+            <div class="form-group row">
+                @Html.Label("Street", new { @Class = "col-12" })
+                <div class="col-md-12">
+                    @*@{var customerservices = new SelectList( ViewBag.DeviceGroups, "id", "title");}*@
+                    @Html.DropDownListFor(m => m.deviceGroupId, (SelectList)ViewBag.DeviceGroups, "Select Device Group", new { @Class = "form-control" })
+                    @Html.ValidationMessageFor(m => m.deviceGroupId)
+                </div>
+            </div>
+
+
+            <div class="form-group row">
+                @Html.LabelFor(m => m.Longitude, new { @Class = "col-12" })
+                <div class="col-md-12">
+                    @Html.TextBox("googleMapLat", Model == null ? 33.88692186799784 : Model.Latitude, new { @Class = "MAPLatitude form-control" })
+                </div>
+            </div>
+
+            <div class="form-group row">
+                @Html.LabelFor(m => m.Latitude, new { @Class = "col-12" })
+                <div class="col-md-12">
+                    @Html.TextBox("googleMapLong", Model == null ? 35.533215332031205 : Model.Longitude, new { @Class = "MAPLongtude form-control" })
+                </div>
+            </div>
+
+            <div class="form-group row">
+                @Html.Label("Google Map", new { @Class = "col-7" })
+                <div class="col-5 mb-1">
+                    <a class="btn btn-alt-info " onclick="PinLocation()"> Pin your Location</a>
+                </div>
+                <div class="col-12" id="mapcontainer" style="min-height: 300px;">
+                    @Html.GoogleMap(Model == null ? 33.88692186799784 : Model.Latitude, Model == null ? 35.533215332031205 : Model.Longitude, null, "mapcontainer", Model == null)
+                </div>
+
+            </div>
+
+            <div class="form-group row">
+                @Html.LabelFor(m => m.Image, new { @Class = "col-12 " })
+                <div class="col-12 last-image-padding">
+                    <label class="custom-file">
+                        @Html.UploaderFor(m => m.Image)
+                        <span class="custom-file-control"></span>
+                    </label>
+                </div>
+            </div>
+            @if (Model != null && !string.IsNullOrEmpty(Model.Image))
+                {
+                <style>
+                    .block-content form-group:last-child {
+                        margin-top: 10em;
+                    }
+                </style>
+            }
+            @{
+                var controller = ViewContext.RouteData.Values["controller"].ToString().ToLower();
+                var action = ViewContext.RouteData.Values["action"].ToString().ToLower();
+            }
+            <div class="form-group row" @( (Model != null && !string.IsNullOrEmpty(Model.Image)) ? "style=margin-top:10em!important;" : "style=margin-top:6em!important;")>
+                <div class="col-lg-8 ml-auto">
+                    <button type="submit" class="btn btn-alt-primary">Save</button>
+
+                    <button type="button" class="btn btn-alt-primary" onclick="location.href ='@(Url.Content("~/" + controller+(Request["parentId"] == null ?"":"?parentId="+Request["parentId"]) + "#thisId=" + ViewContext.RouteData.Values["id"]))'">Cancel</button>
+                </div>
+            </div>
+            <div class="publish-section"></div>
+
+        </div>
+    </div>
+                }

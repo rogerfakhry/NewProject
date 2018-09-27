@@ -1,0 +1,19 @@
+﻿@{
+    var controller = ViewContext.RouteData.Values["controller"].ToString().ToLower();
+    var action = ViewContext.RouteData.Values["action"].ToString().ToLower();
+}
+
+@if (action != "index")
+{
+    <div class="form-group row">
+        <div class="col-lg-8 ml-auto">
+            <button type="submit" class="btn btn-alt-primary">Save</button>
+       
+            <button type="button" class="btn btn-alt-primary" onclick="location.href ='@(Url.Content("~/" + controller+(Request["parentId"] == null ?"":"?parentId="+Request["parentId"]) + "#thisId=" + ViewContext.RouteData.Values["id"]))'">Cancel</button>
+        </div>
+    </div>
+    <div class="publish-section"></div>
+}
+
+
+

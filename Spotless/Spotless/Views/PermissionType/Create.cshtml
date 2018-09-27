@@ -1,0 +1,39 @@
+﻿@model Spotless.Models.PermissionType
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="sub-content-container">
+    @using (Html.BeginForm())
+    {
+        @Html.AntiForgeryToken()
+        @Html.HiddenFor(m => m.id)
+
+        <div class="sub-header-buttons">
+            @{Html.RenderPartial("par_Crud");}
+        </div>
+
+        <div class="errors-section">
+            @Html.ValidationSummary(true,"Something went wrong, please retry!")
+        </div>
+
+        <div class="field-container">
+            @{Html.RenderPartial("par_Publish");}
+
+            <div class="control-group">
+                @Html.LabelFor(m => m.title, new { @Class = "control-label inlineblock" })
+                <div class="controls inlineblock">
+                    @Html.TextBoxFor(m => m.title)
+                    @Html.ValidationMessageFor(m => m.title)
+                </div>
+            </div>
+            <div class="control-group">
+                @Html.LabelFor(m => m.computername, new { @Class = "control-label inlineblock" })
+                <div class="controls inlineblock">
+                    @Html.TextBoxFor(m => m.computername)
+                    @Html.ValidationMessageFor(m => m.computername)
+                </div>
+            </div>
+        </div>
+    }
+</div>

@@ -1,0 +1,81 @@
+﻿@model Spotless.Models.UpdateModel
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+
+    @Html.Hidden("UserId", (string)ViewBag.UserId)
+
+
+    <div class="errors-section">
+        @Html.ValidationSummary(true, "Something went wrong, please retry!")
+    </div>
+    <div class="block">
+        <div class="block-header block-header-default">
+            <h3 class="block-title">Profile</h3>
+        </div>
+        <div class="block-content">
+            <div class="field-container">
+
+                <div class="form-group row">
+                    @Html.LabelFor(m => m.UserName, new { @Class = "control-label inlineblock col-md-12" })
+                    <div class="controls inlineblock col-md-12">
+                        @Html.TextBoxFor(m => m.UserName, new { @Class = "form-control" })
+                        @Html.ValidationMessageFor(m => m.UserName)
+                    </div>
+                </div>
+
+                <div class="form-group row">
+                    @Html.LabelFor(m => m.OldPassword, new { @Class = "control-label inlineblock col-md-12" })
+                    <div class="controls inlineblock col-md-12">
+                        @Html.PasswordFor(m => m.OldPassword, new { @Class = "form-control" })
+                        @Html.ValidationMessageFor(m => m.OldPassword)
+                    </div>
+                </div>
+                <div class="form-group row">
+                    @Html.LabelFor(m => m.NewPassword, new { @Class = "control-label inlineblock col-md-12" })
+                    <div class="controls inlineblock col-md-12">
+                        @Html.PasswordFor(m => m.NewPassword, new { @Class = "form-control" })
+                        @Html.ValidationMessageFor(m => m.NewPassword)
+                    </div>
+                </div>
+                <div class="form-group row">
+                    @Html.LabelFor(m => m.ConfirmPassword, new { @Class = "control-label inlineblock col-md-12" })
+                    <div class="controls inlineblock col-md-12">
+                        @Html.PasswordFor(m => m.ConfirmPassword, new { @Class = "form-control" })
+                        @Html.ValidationMessageFor(m => m.ConfirmPassword)
+                    </div>
+                </div>
+                <div class='form-group row @( ViewBag.Role.Contains("customer") ? "hidden" : "")'>
+                    @Html.Label("Customer", new { @Class = "col-12" })
+                    <div class="col-md-12">
+                        @Html.DropDownListFor(m => m.customerId, (SelectList)ViewBag.Customers, "select your customer", new { @Class = "form-control" })
+                        @Html.ValidationMessageFor(m => m.customerId)
+                    </div>
+                </div>
+                <div class='form-group row @( ViewBag.Role.Contains("customer") ? "hidden" : "")'>
+                    @Html.LabelFor(m => m.Roles, new { @Class = "control-label inlineblock col-md-12" })
+                    <div class="controls inlineblock col-md-12">
+                        <select multiple="multiple" id="Roles" name="Roles" class="form-control">
+                            @foreach (var item in (IQueryable<webpages_Role>)ViewBag.Roles)
+                            {
+                                <option @(Model.Roles.Contains(item.RoleName) ? "selected='selected'" : "")>@item.RoleName</option>
+                            }
+                        </select>
+                        @Html.ValidationMessageFor(m => m.Roles)
+                    </div>
+                </div>
+                <div class="sub-header-buttons">
+                    @{Html.RenderPartial("par_Crud");}
+                </div>
+                @{Html.RenderPartial("par_Publish");}
+            </div>
+        </div>
+    </div>
+                    }
+
+

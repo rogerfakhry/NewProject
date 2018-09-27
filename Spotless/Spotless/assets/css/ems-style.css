@@ -1,0 +1,246 @@
+.field-validation-error {
+    display: inline-block;
+    *display: inline;
+    word-spacing: normal;
+    letter-spacing: normal;
+    vertical-align: top;
+    color: red;
+    margin-top: 0.2em;
+}
+
+    .field-validation-error:before {
+        content: "*";
+        display: inline-block;
+        *display: inline;
+        word-spacing: normal;
+        letter-spacing: normal;
+        vertical-align: top;
+        width: 8px;
+        color: red;
+        margin-top: 0.2em;
+    }
+
+.validation-summary-errors {
+    display: inline-block;
+    *display: inline;
+    word-spacing: normal;
+    letter-spacing: normal;
+    vertical-align: top;
+    color: red;
+}
+
+    .validation-summary-errors ul {
+        padding-left: 1.1em;
+    }
+
+        .validation-summary-errors ul li {
+            display: inline-block;
+            *display: inline;
+            word-spacing: normal;
+            letter-spacing: normal;
+            vertical-align: top;
+            list-style-type: circle;
+            color: red;
+        }
+
+            .validation-summary-errors ul li:before {
+                display: inline-block;
+                *display: inline;
+                word-spacing: normal;
+                letter-spacing: normal;
+                vertical-align: top;
+                color: red;
+                content: "*";
+                padding-right: 0.2em;
+            }
+
+body > div.ui-widget-overlay.ui-front {
+    background: rgb(99, 97, 97);
+    opacity: .6;
+}
+
+#googleMap > div > div > div:nth-child(1) > div:nth-child(3) > div:nth-child(2) > div:nth-child(4) > div > div:nth-child(1) > div:nth-child(4) {
+    background: initial !important;
+}
+
+#googleMap > div > div > div:nth-child(1) > div:nth-child(3) > div:nth-child(2) > div:nth-child(4) > div > div:nth-child(1) > div:nth-child(3) > div:nth-child(1) > div {
+    box-shadow: initial !important;
+    background: initial !important;
+}
+
+#googleMap > div > div > div:nth-child(1) > div:nth-child(3) > div:nth-child(2) > div:nth-child(4) > div > div:nth-child(1) > div:nth-child(3) > div:nth-child(2) > div {
+    box-shadow: initial !important;
+    background: initial !important;
+}
+
+#mapBox {
+    background: none repeat scroll 0 0 rgb(241, 239, 233);
+    height: 130px;
+    width: initial;
+    z-index: 1;
+    overflow: hidden;
+    padding: 7px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+    #mapBox .pic {
+        float: left;
+        width: 127px;
+        height: 125px;
+        overflow: hidden;
+    }
+
+    #mapBox .details {
+        float: left;
+        padding-top: 8px;
+        padding-left: 10px;
+        min-width: 200px;
+    }
+
+body#book #content {
+    padding-bottom: 100px;
+}
+
+#mapBox .details h1 {
+    font-weight: 900;
+    font-family: 'Roboto';
+    font-size: 16px;
+    padding-bottom: 3px;
+    margin-top: -0.5em;
+    color: rgb(179, 180, 181);
+}
+
+#mapBox .details h2 {
+    font-weight: normal;
+    font-family: 'roboto';
+    font-size: 14px;
+    padding-bottom: 3px;
+    color: #c38131;
+    margin-bottom: 5px;
+    border-bottom: 1px solid #243039;
+    width: 200px;
+}
+
+#mapBox .details h3 {
+    font-weight: normal;
+    font-family: 'roboto';
+    font-size: 12px;
+    padding-bottom: 2px;
+    margin-top: 0.3em;
+    color: #a8aaac;
+    width: 200px;
+}
+
+.k-grid-content {
+    height: initial !important;
+    max-height: 67vh;
+}
+
+.css-switch .css-control-input~.css-control-indicator{
+    background-color: rgb(167, 168, 167);
+}
+
+#mapBox .details .turnon {
+    display:inline-block;
+    cursor: pointer;
+    background: url(../../../MCContent/emsimages/activate.png) no-repeat;
+    background-position-y: 4px;
+    width: 43px;
+    height: 14px;
+}
+
+#mapBox .details input {
+    display: inline-block;
+    width: 40px;
+}
+
+#mapBox .details .turnoff {
+    display:inline-block;
+    cursor: pointer;
+    background: url(../../../MCContent/emsimages/deactivate.png) no-repeat;
+    width: 43px;
+    height: 13px;
+}
+
+#mapBox .details .startmonitor {
+    cursor: pointer;
+    background: url(../../../MCContent/emsimages/startmonitor.png) no-repeat;
+    width: 83px;
+    height: 13px;
+}
+
+
+#mapBox .details .stopmonitor {
+    cursor: pointer;
+    background: url(../../../MCContent/emsimages/stopmonitor.png) no-repeat;
+    width: 83px;
+    height: 13px;
+}
+
+.nav-main a.active > i {
+    color: #42a5f5;
+}
+
+div.btn-group.show {
+    display: inline-block !important;
+}
+
+.map-container {
+    padding-top: 60px;
+}
+
+#main-container .content {
+    padding-top: 70px !important;
+}
+
+.last-image-padding {
+    padding-bottom: 40px;
+}
+
+div#googleMap {
+    margin-bottom: 2em;
+}
+
+@media (min-width:480px) and (max-width:600px) {
+    .form-control {
+        width: 68% !important;
+    }
+
+    .k-multiselect.k-header {
+        width: 68% !important;
+    }
+
+    #fileupload_Image table {
+        display: flex;
+    }
+}
+
+@media (min-width:320px) and (max-width:479px) {
+    #fileupload_Image table {
+        display: flex;
+    }
+    /*.form-control
+	{
+		width:20em!important;
+	}*/
+    /*.k-multiselect.k-header
+	{
+	  width:20em!important;
+	}*/
+    .custom-file {
+        width: 100%;
+    }
+
+    .row {
+        width: initial !important;
+    }
+}
+
+.content-header {
+    background: rgb(163, 204, 255);
+}
+
+#page-container.main-content-boxed > #main-container .content, #page-container.main-content-boxed > #page-footer .content, #page-container.main-content-boxed > #page-header .content, #page-container.main-content-boxed > #page-header .content-header {
+    max-width: initial;
+}

@@ -1,0 +1,70 @@
+﻿@model Spotless.Models.webpages_Role
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var sections = (IQueryable<Section>)ViewBag.Sections;
+    var permissionTypes = (IQueryable<PermissionType>)ViewBag.PermissionTypes;
+}
+
+<div class="sub-content-container">
+    @using (Html.BeginForm())
+    {
+        @Html.AntiForgeryToken()
+        @Html.HiddenFor(m => m.RoleId)
+
+        <div class="errors-section">
+            @Html.ValidationSummary(true, "Something went wrong, please retry!")
+        </div>
+
+        <div class="field-container">
+            @{Html.RenderPartial("par_Publish");}
+
+            <div class="control-group col-md-12">
+                @Html.LabelFor(m => m.RoleName, new { @Class = "control-label inlineblock" })
+                <div class="controls inlineblock col-md-12">
+                    @Html.TextBoxFor(m => m.RoleName, new { @Class= "form-control col-md-4"})
+                    @Html.ValidationMessageFor(m => m.RoleName)
+                </div>
+            </div>
+
+            <div class="control-group col-md-12">
+                @Html.Label("Sections", new { @Class = "control-label inlineblock" })
+                <div class="controls inlineblock">
+                    <table class="permissions-table" border="0" cellpadding="0" cellspacing="0">
+                        <tbody>
+                            <tr>
+                                <th>Roles</th>
+                                @foreach (var item in permissionTypes)
+                                {
+                                    <th>@item.title</th>
+                                }
+                            </tr>
+                        </tbody>
+                        <tbody>
+                            @foreach (var item in sections)
+                            {
+                                <tr>
+                                    <td>@item.title</td>
+                                    @foreach (var type in permissionTypes)
+                                    {
+                                        <td align="center">
+                                            <label class="custom-control custom-checkbox">
+                                            <input name="permission_@(item.id)" @(item.HasPermission(Model.RoleId,type.id)?"checked='checked'":"") value="@(type.id)" class="custom-control-input"  type="checkbox">
+                                              <span class="custom-control-indicator"></span>
+                                            <label for="permission_@(item.id)" class="custom - control - description"></label>
+                                                </label>
+                                        </td>
+                                    }
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+
+        </div>
+                            <div class="sub-header-buttons">
+            @{Html.RenderPartial("par_Crud");}
+        </div>
+    }
+</div>

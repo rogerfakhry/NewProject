@@ -1,0 +1,70 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var controller = ViewContext.RouteData.Values["controller"].ToString().ToLower();
+    var permissions = (EPermission)ViewBag.Permissions;  
+}
+
+<div class="sub-content-container kgrid">
+    <div class='grid-table'>
+        @{Html.Kendo().Grid<CustomerType>()
+        .Name("grid")
+        .Columns(columns =>
+        {
+            columns.Bound(c => c.id).Visible(false);
+            columns.Bound(c => c.name);
+            columns.Bound(c => c.dateModified).Format("{0:dd/MM/yyyy}");
+            columns.Command(c =>
+            {
+                if (permissions.CanUpdate)
+                {
+                    c.Custom("edit").Text("Edit").HtmlAttributes(new { @onclick = "GoToUpdatePage($(this),event)" });
+                }
+                if (permissions.CanDelete)
+                {
+                    c.Destroy();
+                }
+            }).Width(172);
+        })
+        .ToolBar(toolbar =>
+            {
+                if (permissions.CanCreate)
+                {
+                    toolbar.Template(
+            @<text><a class="k-button k-button-icontext" href="@Url.Content("~/" + controller + "/create")">
+                <span class="k-icon k-add"></span>
+                Add new record
+            </a></text>
+);
+                }
+            })
+            .HtmlAttributes(new { @Class = "grid" + (permissions.CanSort ? " issortable" : "") })
+        .Filterable()
+        .Scrollable()
+        .Sortable()
+        .Pageable(pageable => pageable
+            .Refresh(true)
+            .ButtonCount(5))
+        .DataSource(dataSource => dataSource
+            .Ajax()
+            .AutoSync(true)
+            .PageSize(20)
+            .ServerOperation(true)
+            .Model(model => model.Id(p => p.id))
+            .Destroy("Delete", "CustomerType")
+            .Read("ReadData", "CustomerType")
+        ).Render();
+        }
+        @if (permissions.CanSort)
+        {    
+            @(Html.Kendo().Sortable()
+            .For(".grid")
+            .Filter("table > tbody > tr")
+            .Cursor("move")
+            .HintHandler("noHint")
+            .PlaceholderHandler("SortPlaceholder")
+            .ContainerSelector(".grid tbody")
+            .Events(events => events.Change("OnSortChange"))
+        )
+        }
+    </div>
+</div>

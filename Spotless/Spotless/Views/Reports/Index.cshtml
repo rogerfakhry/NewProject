@@ -1,0 +1,78 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var controller = ViewContext.RouteData.Values["controller"].ToString().ToLower();    
+    var permissions = (EPermission)ViewBag.Permissions;
+}
+<script>
+    $(function () {
+        $(".k-grid-excel").click(function (e) {
+            // Prevent the default behavior which will prompt the user to save the generated file.
+            e.preventDefault();
+            // Get the Excel file as a data URL.
+            console.log('test');
+            var dataURL = new kendo.ooxml.Workbook(e.workbook).toDataURL();
+            // Strip the data URL prologue.
+            var base64 = dataURL.split(";base64,")[1];
+            // Post the base64 encoded content to the server which can save it.
+            $.post("Reports/Excel_Export_Save", {
+                base64: base64,
+                fileName: "ExcelExport.xlsx"
+            }
+            , function (data) {
+                var url = 'data:application/vnd.ms-excel,' + encodeURIComponent(data);
+                location.href = url;
+                return false;
+            });
+        });
+    });
+</script>
+    <div class='grid-table'>
+
+    @{Html.Kendo().Grid<DeviceHistory>()
+                                                  .Name("grid")
+                                                  .Columns(columns =>
+                                                  {
+                                                      columns.Bound(c => c.id).Visible(false);
+                                                      columns.Bound(c => c.DeviceListingOfGroup).Title("Group");
+                                                      columns.Bound(c => c.Device_id).Title("Device Number");
+                                                      columns.Bound(c => c.PVVoltage).Title("PV Voltage (V)");
+                                                      columns.Bound(c => c.PVCurrent).Title("PV Current (A)");
+                                                      columns.Bound(c => c.BatteryTemp).Title("BatteryTemp (C)");
+                                                      columns.Bound(c => c.BatterySOC).Title("Battery SOC (%)");
+                                                  }).ToolBar(tools => tools.Excel().HtmlAttributes(new { @class = "toolbar-field" }))
+                        .HtmlAttributes(new { @Class = "grid" + (permissions.CanSort ? " issortable" : "") })
+                    .Filterable()
+                    .Scrollable()
+                    .Excel(excel => excel
+                    .FileName("Report.xlsx")
+                    .Filterable(true)
+                    .ProxyURL(Url.Action("Excel_Export_Save", "Reports"))
+                    .ForceProxy(true)
+                    )
+                    .Pageable(pageable => pageable
+                        .Refresh(true)
+                        .ButtonCount(5))
+                    .DataSource(dataSource => dataSource
+                        .Ajax()
+                        .AutoSync(true)
+                        .PageSize(20)
+                        .ServerOperation(true)
+                        .Model(model => model.Id(p => p.id))
+                        .Read("ReadData", "Reports")
+                    ).Render();
+    }
+    @if (permissions.CanSort)
+    {
+        @(Html.Kendo().Sortable()
+            .For(".grid")
+            .Filter("table > tbody > tr")
+            .Cursor("move")
+            .HintHandler("noHint")
+            .PlaceholderHandler("SortPlaceholder")
+            .ContainerSelector(".grid tbody")
+            .Events(events => events.Change("OnSortChange"))
+        )
+
+    }
+</div> 
+

@@ -1,0 +1,137 @@
+﻿@model IEnumerable<Spotless.Models.DeviceHistory>
+    <!DOCTYPE html>
+
+    <html>
+    <head>
+        <meta name="viewport" content="width=device-width" />
+        <title>ExportView</title>
+    </head>
+    <body>
+        <div>
+            <table>
+                <tr>
+                    <th> Device Group</th>
+                    <th>@Html.DisplayNameFor(model => model.deviceNumber)</th>
+                    <th>@Html.DisplayNameFor(model => model.deviceId)</th>
+                    <th>@Html.DisplayNameFor(model => model.PVVoltage)</th>
+                    <th>@Html.DisplayNameFor(model => model.PVCurrent)</th>
+                    <th>@Html.DisplayNameFor(model => model.PVPowerL)</th>
+                    <th>@Html.DisplayNameFor(model => model.PVPowerH)</th>
+                    <th>@Html.DisplayNameFor(model => model.BAVoltage)</th>
+                    <th>@Html.DisplayNameFor(model => model.BACurrent)</th>
+                    <th>@Html.DisplayNameFor(model => model.Reserve)</th>
+                    <th>@Html.DisplayNameFor(model => model.Reserve1)</th>
+                    <th>@Html.DisplayNameFor(model => model.ACVoltage)</th>
+                    <th>@Html.DisplayNameFor(model => model.ACCurrent)</th>
+                    <th>@Html.DisplayNameFor(model => model.ACPowerL)</th>
+                    <th>@Html.DisplayNameFor(model => model.ACPowerH)</th>
+                    <th>@Html.DisplayNameFor(model => model.LEDLoadVoltage)</th>
+                    <th>@Html.DisplayNameFor(model => model.LEDLoadCurrent)</th>
+                    <th>@Html.DisplayNameFor(model => model.LEDLoadPowerL)</th>
+                    <th>@Html.DisplayNameFor(model => model.LEDLoadPowerH)</th>
+                    <th>@Html.DisplayNameFor(model => model.Load1Voltage)</th>
+                    <th>@Html.DisplayNameFor(model => model.Load1Current)</th>
+                    <th>@Html.DisplayNameFor(model => model.Load1PowerL)</th>
+                    <th>@Html.DisplayNameFor(model => model.Load1PowerH)</th>
+                    <th>@Html.DisplayNameFor(model => model.Load2Voltage)</th>
+                    <th>@Html.DisplayNameFor(model => model.Load2Current)</th>
+                    <th>@Html.DisplayNameFor(model => model.Load2PowerL)</th>
+                    <th>@Html.DisplayNameFor(model => model.Load2PowerH)</th>
+                    <th>@Html.DisplayNameFor(model => model.Load3Voltage)</th>
+                    <th>@Html.DisplayNameFor(model => model.Load3Current)</th>
+                    <th>@Html.DisplayNameFor(model => model.Load3PowerL)</th>
+                    <th>@Html.DisplayNameFor(model => model.Load3PowerH)</th>
+                    <th>@Html.DisplayNameFor(model => model.BatteryTemp)</th>
+                    <th>@Html.DisplayNameFor(model => model.ControllerTemp)</th>
+                    <th>@Html.DisplayNameFor(model => model.Reserve2)</th>
+                    <th>@Html.DisplayNameFor(model => model.BatterySOC)</th>
+                    <th>@Html.DisplayNameFor(model => model.MaximumInputVoltageOfPVOfDay)</th>
+                    <th>@Html.DisplayNameFor(model => model.MinimumInputVoltageOfPVOfDay)</th>
+                    <th>@Html.DisplayNameFor(model => model.MaximumBatteryVoltageOfDay)</th>
+                    <th>@Html.DisplayNameFor(model => model.MinimumBatteryVoltageOfDay)</th>
+                    <th>@Html.DisplayNameFor(model => model.TotalPowerConsumptionOfDayL)</th>
+                    <th>@Html.DisplayNameFor(model => model.TotalPowerConsumptionOfDayH)</th>
+                    <th>@Html.DisplayNameFor(model => model.TotalPowerConsumptionOfMonthL)</th>
+                    <th>@Html.DisplayNameFor(model => model.TotalPowerConsumptionOfMonthH)</th>
+                    <th>@Html.DisplayNameFor(model => model.TotalPowerConsumptionOfYearL)</th>
+                    <th>@Html.DisplayNameFor(model => model.TotalPowerConsumptionOfYearH)</th>
+                    <th>@Html.DisplayNameFor(model => model.TotalPowerConsumptionL)</th>
+                    <th>@Html.DisplayNameFor(model => model.TotalPowerConsumptionH)</th>
+                    <th>@Html.DisplayNameFor(model => model.TotalPowerGenerationOfDayL)</th>
+                    <th>@Html.DisplayNameFor(model => model.TotalPowerGenerationOfDayH)</th>
+                    <th>@Html.DisplayNameFor(model => model.TotalPowerGenerationOfMonthL)</th>
+                    <th>@Html.DisplayNameFor(model => model.TotalPowerGenerationOfMonthH)</th>
+                    <th>@Html.DisplayNameFor(model => model.TotalPowerGenerationOfYearL)</th>
+                    <th>@Html.DisplayNameFor(model => model.TotalPowerGenerationOfYearH)</th>
+                    <th>@Html.DisplayNameFor(model => model.TotalPowerGenerationL)</th>
+                    <th>@Html.DisplayNameFor(model => model.TotalPowerGenerationH)</th>
+                    <th>@Html.DisplayNameFor(model => model.insertDateTime)</th>
+                    <th></th>
+                </tr>
+
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <th>@Html.DisplayFor(modelItem => item.Device.DeviceGroup.title)</th>
+                        <th>@Html.DisplayFor(modelItem => item.deviceNumber)</th>
+                        <th>@Html.DisplayFor(modelItem => item.deviceId)</th>
+                        <th>@Html.DisplayFor(modelItem => item.PVVoltage)</th>
+                        <th>@Html.DisplayFor(modelItem => item.PVCurrent)</th>
+                        <th>@Html.DisplayFor(modelItem => item.PVPowerL)</th>
+                        <th>@Html.DisplayFor(modelItem => item.PVPowerH)</th>
+                        <th>@Html.DisplayFor(modelItem => item.BAVoltage)</th>
+                        <th>@Html.DisplayFor(modelItem => item.BACurrent)</th>
+                        <th>@Html.DisplayFor(modelItem => item.Reserve)</th>
+                        <th>@Html.DisplayFor(modelItem => item.Reserve1)</th>
+                        <th>@Html.DisplayFor(modelItem => item.ACVoltage)</th>
+                        <th>@Html.DisplayFor(modelItem => item.ACCurrent)</th>
+                        <th>@Html.DisplayFor(modelItem => item.ACPowerL)</th>
+                        <th>@Html.DisplayFor(modelItem => item.ACPowerH)</th>
+                        <th>@Html.DisplayFor(modelItem => item.LEDLoadVoltage)</th>
+                        <th>@Html.DisplayFor(modelItem => item.LEDLoadCurrent)</th>
+                        <th>@Html.DisplayFor(modelItem => item.LEDLoadPowerL)</th>
+                        <th>@Html.DisplayFor(modelItem => item.LEDLoadPowerH)</th>
+                        <th>@Html.DisplayFor(modelItem => item.Load1Voltage)</th>
+                        <th>@Html.DisplayFor(modelItem => item.Load1Current)</th>
+                        <th>@Html.DisplayFor(modelItem => item.Load1PowerL)</th>
+                        <th>@Html.DisplayFor(modelItem => item.Load1PowerH)</th>
+                        <th>@Html.DisplayFor(modelItem => item.Load2Voltage)</th>
+                        <th>@Html.DisplayFor(modelItem => item.Load2Current)</th>
+                        <th>@Html.DisplayFor(modelItem => item.Load2PowerL)</th>
+                        <th>@Html.DisplayFor(modelItem => item.Load2PowerH)</th>
+                        <th>@Html.DisplayFor(modelItem => item.Load3Voltage)</th>
+                        <th>@Html.DisplayFor(modelItem => item.Load3Current)</th>
+                        <th>@Html.DisplayFor(modelItem => item.Load3PowerL)</th>
+                        <th>@Html.DisplayFor(modelItem => item.Load3PowerH)</th>
+                        <th>@Html.DisplayFor(modelItem => item.BatteryTemp)</th>
+                        <th>@Html.DisplayFor(modelItem => item.ControllerTemp)</th>
+                        <th>@Html.DisplayFor(modelItem => item.Reserve2)</th>
+                        <th>@Html.DisplayFor(modelItem => item.BatterySOC)</th>
+                        <th>@Html.DisplayFor(modelItem => item.MaximumInputVoltageOfPVOfDay)</th>
+                        <th>@Html.DisplayFor(modelItem => item.MinimumInputVoltageOfPVOfDay)</th>
+                        <th>@Html.DisplayFor(modelItem => item.MaximumBatteryVoltageOfDay)</th>
+                        <th>@Html.DisplayFor(modelItem => item.MinimumBatteryVoltageOfDay)</th>
+                        <th>@Html.DisplayFor(modelItem => item.TotalPowerConsumptionOfDayL)</th>
+                        <th>@Html.DisplayFor(modelItem => item.TotalPowerConsumptionOfDayH)</th>
+                        <th>@Html.DisplayFor(modelItem => item.TotalPowerConsumptionOfMonthL)</th>
+                        <th>@Html.DisplayFor(modelItem => item.TotalPowerConsumptionOfMonthH)</th>
+                        <th>@Html.DisplayFor(modelItem => item.TotalPowerConsumptionOfYearL)</th>
+                        <th>@Html.DisplayFor(modelItem => item.TotalPowerConsumptionOfYearH)</th>
+                        <th>@Html.DisplayFor(modelItem => item.TotalPowerConsumptionL)</th>
+                        <th>@Html.DisplayFor(modelItem => item.TotalPowerConsumptionH)</th>
+                        <th>@Html.DisplayFor(modelItem => item.TotalPowerGenerationOfDayL)</th>
+                        <th>@Html.DisplayFor(modelItem => item.TotalPowerGenerationOfDayH)</th>
+                        <th>@Html.DisplayFor(modelItem => item.TotalPowerGenerationOfMonthL)</th>
+                        <th>@Html.DisplayFor(modelItem => item.TotalPowerGenerationOfMonthH)</th>
+                        <th>@Html.DisplayFor(modelItem => item.TotalPowerGenerationOfYearL)</th>
+                        <th>@Html.DisplayFor(modelItem => item.TotalPowerGenerationOfYearH)</th>
+                        <th>@Html.DisplayFor(modelItem => item.TotalPowerGenerationL)</th>
+                        <th>@Html.DisplayFor(modelItem => item.TotalPowerGenerationH)</th>
+                        <th>@Html.DisplayFor(modelItem => item.insertDateTime)</th>
+                    </tr>
+                }
+
+            </table>
+        </div>
+    </body>
+</html>

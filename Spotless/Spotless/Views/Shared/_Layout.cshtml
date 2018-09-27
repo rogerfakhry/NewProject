@@ -1,0 +1,272 @@
+﻿<!doctype html>
+
+@{
+    var controller = ViewContext.RouteData.Values["controller"].ToString().ToLower();
+    var action = ViewContext.RouteData.Values["action"].ToString().ToLower();
+    var permissions = (EPermission)ViewBag.Permissions;
+}
+
+<!--[if lte IE 9]>     <html lang="en" class="no-focus lt-ie10 lt-ie10-msg"> <![endif]-->
+<!--[if gt IE 9]><!-->
+<html lang="en" class="no-focus">
+<!--<![endif]-->
+<head id="Head1" runat="server">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0" />
+
+    <title>@("EMS - " + System.Configuration.ConfigurationManager.AppSettings["ApplicationName"] + " - " + ViewBag.Title)</title>
+
+    <meta name="description" content="Spotless" />
+    <meta name="author" content="pixelcave" />
+    <meta name="robots" content="noindex, nofollow" />
+
+    <!-- Open Graph Meta -->
+    <meta property="og:title" content="Spotless" />
+    <meta property="og:site_name" content="Spotless" />
+    <meta property="og:description" content="Spotless" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="" />
+    <meta property="og:image" content="" />
+
+    <!-- Icons -->
+    <!-- The following icons can be replaced with your own, they are used by desktop and mobile browsers -->
+    <link rel="shortcut icon" href="assets/img/favicons/favicon.png" />
+    <link rel="icon" type="image/png" sizes="192x192" href="assets/img/favicons/favicon-192x192.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="assets/img/favicons/apple-touch-icon-180x180.png" />
+    <!-- END Icons -->
+    <!-- Stylesheets -->
+    <!-- Codebase framework -->
+    <link rel="stylesheet" id="css-main" href="@Url.Content("~/assets/css/codebase.min.css")" />
+    <link rel="stylesheet" href="@Url.Content("~/assets/css/ems-style.css")" />
+    <link rel="Stylesheet" href="@Url.Content("~/MCContent/css/kendo.common.min.css")" />
+    <link rel="Stylesheet" href="@Url.Content("~/MCContent/css/kendo.metro.min.css")" />
+
+
+    <!-- Codebase Core JS -->
+    @if (controller != "reports")
+    {
+        <script src="@Url.Content("~/assets/js/core/jquery.min.js")"></script>
+        <script src="@Url.Content("~/assets/js/core/jquery-migrate-3.0.0.js")"></script>
+    }
+    else
+    {
+        <script src="@Url.Content("~/assets/js/core/jquery-1.12.3.min.js")"></script>
+    }
+    <script src="@Url.Content("~/assets/js/core/popper.min.js")"></script>
+    <script src="@Url.Content("~/assets/js/core/jquery.slimscroll.min.js")"></script>
+    <script src="@Url.Content("~/assets/js/core/jquery.scrollLock.min.js")"></script>
+    <script src="@Url.Content("~/assets/js/core/jquery.appear.min.js")"></script>
+    <script src="@Url.Content("~/assets/js/core/jquery.countTo.min.js")"></script>
+    <script src="@Url.Content("~/assets/js/core/bootstrap.min.js")"></script>
+    <script src="@Url.Content("~/assets/js/core/js.cookie.min.js")"></script>
+
+    <script src="@Url.Content("~/assets/js/codebase.js")"></script>
+
+
+    <script type="text/javascript" language="javascript" src="@Url.Content("~/scripts/jquery.validate.min.js")"></script>
+    <script type="text/javascript" language="javascript" src="@Url.Content("~/scripts/jquery.validate.unobtrusive.js")"></script>
+    @if (controller == "reports" || (controller == "device" && action == "index"))
+    {
+        <script src="https://kendo.cdn.telerik.com/2017.2.621/js/jszip.min.js"></script>
+        <script src="https://kendo.cdn.telerik.com/2017.2.621/js/kendo.all.min.js"></script>
+            <script src="https://kendo.cdn.telerik.com/2017.2.621/js/kendo.aspnetmvc.min.js"></script>
+            <script src="https://kendo.cdn.telerik.com/2017.2.621/js/kendo.timezones.min.js"></script>
+    }
+    else
+    {
+        <script src="@Url.Content("~/scripts/kendo.web.min.js")"></script>
+        <script src="@Url.Content("~/scripts/kendo.aspnetmvc.min.js")"></script>
+    }
+    <script src="@Url.Content("~/scripts/jquery-ui.min.js")"></script>
+    <!--uploader-->
+    <link href="@Url.Content("~/MCContent/css/bootstrap.min.css")" rel="stylesheet">
+    <link href="@Url.Content("~/MCContent/css/jquery.fileupload.css")" rel="stylesheet">
+    <!--end uploader-->
+    <!-- You can include a specific file from css/themes/ folder to alter the default color theme of the template. eg: -->
+    <!-- <link rel="stylesheet" id="css-theme" href="assets/css/themes/flat.min.css"> -->
+    <!-- END Stylesheets -->
+</head>
+
+<body @ViewBag.BodyAttributes=ViewBag.BodyAttributes ng-app="ems-app" ngmodelonblur=ngmodelonblur>
+    <input id="route" value="@Url.Content("~/")" type="hidden" />
+    <input id="controller" value="@controller" type="hidden" />
+    <input id="action" value="@action" type="hidden" />
+    <!-- Page Container -->
+    <!--
+        Available classes for #page-container:
+
+    GENERIC
+
+        'enable-cookies'                            Remembers active color theme between pages (when set through color theme helper Codebase() -> uiHandleTheme())
+
+    SIDEBAR & SIDE OVERLAY
+
+        'sidebar-r'                                 Right Sidebar and left Side Overlay (default is left Sidebar and right Side Overlay)
+        'sidebar-mini'                              Mini hoverable Sidebar (screen width > 991px)
+        'sidebar-o'                                 Visible Sidebar by default (screen width > 991px)
+        'sidebar-o-xs'                              Visible Sidebar by default (screen width < 992px)
+        'sidebar-inverse'                           Dark themed sidebar
+
+        'side-overlay-hover'                        Hoverable Side Overlay (screen width > 991px)
+        'side-overlay-o'                            Visible Side Overlay by default
+
+        'side-scroll'                               Enables custom scrolling on Sidebar and Side Overlay instead of native scrolling (screen width > 991px)
+
+    HEADER
+
+        ''                                          Static Header if no class is added
+        'page-header-fixed'                         Fixed Header
+
+    HEADER STYLE
+
+        ''                                          Classic Header style if no class is added
+        'page-header-modern'                        Modern Header style
+        'page-header-inverse'                       Dark themed Header (works only with classic Header style)
+        'page-header-glass'                         Light themed Header with transparency by default
+                                                    (absolute position, perfect for light images underneath - solid light background on scroll if the Header is also set as fixed)
+        'page-header-glass page-header-inverse'     Dark themed Header with transparency by default
+                                                    (absolute position, perfect for dark images underneath - solid dark background on scroll if the Header is also set as fixed)
+
+    MAIN CONTENT LAYOUT
+
+        ''                                          Full width Main Content if no class is added
+        'main-content-boxed'                        Full width Main Content with a specific maximum width (screen width > 1200px)
+        'main-content-narrow'                       Full width Main Content with a percentage width (screen width > 1200px)
+    -->
+    <div id="page-container" class="sidebar-o side-scroll page-header-modern main-content-boxed">
+
+        <!-- Sidebar -->
+        <!--
+            Helper classes
+
+            Adding .sidebar-mini-hide to an element will make it invisible (opacity: 0) when the sidebar is in mini mode
+            Adding .sidebar-mini-show to an element will make it visible (opacity: 1) when the sidebar is in mini mode
+                If you would like to disable the transition, just add the .sidebar-mini-notrans along with one of the previous 2 classes
+
+            Adding .sidebar-mini-hidden to an element will hide it when the sidebar is in mini mode
+            Adding .sidebar-mini-visible to an element will show it only when the sidebar is in mini mode
+                - use .sidebar-mini-visible-b if you would like to be a block when visible (display: block)
+        -->
+
+
+        @if (controller != "account" || action != "login")
+        {
+            <!-- BEGIN SIDEBAR -->
+            Html.RenderPartial("par_MainMenu");
+            <!-- END SIDEBAR -->
+
+            <!-- END Sidebar -->
+            <!-- Header -->
+
+            <!-- BEGIN SIDEBAR -->
+            Html.RenderPartial("par_PageHeader");
+            <!-- END SIDEBAR -->
+            <!-- END Header -->
+
+        }
+        <!-- Main Container -->
+        <main id="main-container">
+            <!-- Page Content -->
+            <div class="content">
+                @*<h2 class="content-heading">Blank <small>Get Started</small></h2>
+                    <p>Create your own awesome project!</p>*@
+                @RenderBody()
+            </div>
+            <!-- END Page Content -->
+        </main>
+        <!-- END Main Container -->
+        <!-- Footer -->
+        <footer id="page-footer" class="opacity-0">
+            @*<div class="content py-20 font-size-xs clearfix">
+                    <div class="float-right">
+                        Crafted with <i class="fa fa-heart text-pulse"></i> by <a class="font-w600" href="http://goo.gl/vNS3I" target="_blank">pixelcave</a>
+                    </div>
+                    <div class="float-left">
+                        <a class="font-w600" href="https://goo.gl/po9Usv" target="_blank">Codebase 1.0</a> &copy; <span class="js-year-copy">2017</span>
+                    </div>
+                </div>*@
+        </footer>
+        <!-- END Footer -->
+    </div>
+    <!-- END Page Container -->
+    <!--uploader-->
+    <!-- The template to display files available for upload -->
+    <script id="template-upload" type="text/x-tmpl">
+        {% for (var i=0, file; file=o.files[i]; i++) { %}
+        <tr class="template-upload fade">
+            <td>
+                <span class="preview"></span>
+            </td>
+            <td>
+                <p class="name">{%=file.prettyName%}</p>
+                <strong class="error text-danger"></strong>
+            </td>
+            <td>
+                <p class="size">Processing...</p>
+                <div class="progress progress-striped active" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div class="progress-bar progress-bar-success" style="width:0%;"></div></div>
+            </td>
+            <td>
+                {% if (!i) { %}
+                <button class="btn btn-warning cancel">
+                    <i class="glyphicon glyphicon-ban-circle"></i>
+                    <span>Cancel</span>
+                </button>
+                {% } %}
+                {% if (!i && !o.options.autoUpload) { %}
+                <button class="btn btn-primary start" disabled>
+                    <i class="glyphicon glyphicon-upload"></i>
+                    <span>Start</span>
+                </button>
+                {% } %}
+            </td>
+        </tr>
+        {% } %}
+    </script>
+    <!-- The template to display files available for download -->
+    <script id="template-download" type="text/x-tmpl">
+        {% for (var i=0, file; file=o.files[i]; i++) { %}
+        <tr class="template-download fade" file-name="{%=file.name%}">
+            <td>
+                <span class="preview">
+                    {% if (file.thumbnailUrl) { %}
+                    <a href="{%=file.url%}" title="{%=file.prettyName%}" download="{%=file.url%}" data-gallery><img src="{%=file.thumbnailUrl%}"></a>
+                    {% } %}
+                </span>
+            </td>
+            <td>
+                <p class="name">
+                    {% if (file.url) { %}
+                    <a href="{%=file.url%}" title="{%=file.prettyName%}" download="{%=file.url%}" {%=file.thumbnailUrl?'data-gallery':''%}>{%=file.prettyName%}</a>
+                    {% } else { %}
+                    <span>{%=fileName%}</span>
+                    {% } %}
+                </p>
+                {% if (file.error) { %}
+                <div><span class="label label-danger">Error</span> {%=file.error%}</div>
+                {% } %}
+            </td>
+            <td>
+                <span class="size">{%=o.formatFileSize(file.size)%}</span>
+            </td>
+            <td>
+                {% if (file.deleteUrl) { %}
+                <button class="btn btn-danger delete" data-type="{%=file.deleteType%}" data-url="{%=file.deleteUrl%}" {% if (file.deleteWithCredentials) { %} data-xhr-fields='{"withCredentials":true}' {% } %}>
+                    <i class="glyphicon glyphicon-trash"></i>
+                    <span>Delete</span>
+                </button>
+                {% } else { %}
+                <button class="btn btn-warning cancel">
+                    <i class="glyphicon glyphicon-ban-circle"></i>
+                    <span>Cancel</span>
+                </button>
+                {% } %}
+            </td>
+        </tr>
+        {% } %}
+    </script>
+    @Scripts.Render("~/bundles/uploader")
+    <script src="~/Scripts/ems-js.js"></script>
+    <script type="text/javascript" language="javascript" src="@Url.Content("~/scripts/ems.js")"></script>
+    @RenderSection("scripts", required: false)
+</body>
+</html>

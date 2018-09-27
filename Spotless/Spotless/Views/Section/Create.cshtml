@@ -1,0 +1,138 @@
+﻿@model Spotless.Models.Section
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var roles = (IQueryable<webpages_Role>)ViewBag.Roles;
+    var permissionTypes = (IQueryable<PermissionType>)ViewBag.PermissionTypes;
+}
+
+
+    @using (Html.BeginForm())
+    {
+        @Html.AntiForgeryToken()
+        @Html.HiddenFor(m => m.id)
+
+        
+
+        <div class="errors-section">
+            @Html.ValidationSummary(true, "Something went wrong, please retry!")
+        </div>
+
+        <div class="field-container">
+            @{Html.RenderPartial("par_Publish");}
+
+            <div class="block">
+                <div class="block-header block-header-default">
+                    <h3 class="block-title">Add Section</h3>
+                </div>
+
+                <div class="block-content">
+                    <div class="form-group row">
+                        @Html.LabelFor(m => m.title, new { @Class = "col-12" })
+                        <div class="col-md-12">
+                            @Html.TextBoxFor(m => m.title, new { @Class = "form-control" })
+                            @Html.ValidationMessageFor(m => m.title)
+                        </div>
+                    </div>
+
+
+                    <div class="form-group row">
+                        @Html.LabelFor(m => m.computername, new { @Class = "col-12" })
+                        <div class="col-md-12">
+                            @Html.TextBoxFor(m => m.computername, new { @Class = "form-control" })
+                            @Html.ValidationMessageFor(m => m.computername)
+                        </div>
+                    </div>
+
+
+
+                    <div class="form-group row">
+                        @Html.LabelFor(m => m.navicon, new { @Class = "col-12" })
+                        <div class="col-md-12">
+                            @Html.TextBoxFor(m => m.navicon, new { @Class = "form-control" })
+                        </div>
+                    </div>
+
+
+
+                    <div class="custom-controls-stacked">
+                        <label class="custom-control custom-checkbox">
+                            @Html.CheckBoxFor(m => m.isPublishable, new { @Class = "custom-control-input" })
+                            <span class="custom-control-indicator"></span>
+                            @Html.LabelFor(m => m.isPublishable, new { @Class = "custom - control - description" })
+                            @Html.ValidationMessageFor(m => m.isPublishable)
+                        </label>
+                        
+                        <label class="custom-control custom-checkbox">
+                            @Html.CheckBoxFor(m => m.showOnMenu, new { @Class = "custom-control-input" })
+                            <span class="custom-control-indicator"></span>
+                            @Html.LabelFor(m => m.showOnMenu, new { @Class = "custom - control - description" })
+                            @Html.ValidationMessageFor(m => m.showOnMenu)
+                        </label>
+
+                        <label class="custom-control custom-checkbox">
+                            @Html.CheckBoxFor(m => m.isSortable, new { @Class = "custom-control-input" })
+                            <span class="custom-control-indicator"></span>
+                            @Html.LabelFor(m => m.isSortable, new { @Class = "custom - control - description" })
+                            @Html.ValidationMessageFor(m => m.isSortable)
+                        </label>
+                    </div>
+
+                    <div class="form-group row">
+                      &nbsp;
+                    </div>
+
+                    <div class="form-group row">
+                        
+                        <div class="form-group row">
+                            @Html.LabelFor(m => m.relatedPermissions, new { @Class = "col-12" })
+                        </div>
+                        
+                       
+                        <div class="col-12">
+                            <table  border="0" cellpadding="0" cellspacing="0">
+                                <tbody>
+                                    <tr>
+                                        <th>Roles</th>
+                                        @foreach (var item in permissionTypes)
+                                        {
+                                            <th>&nbsp;@item.title&nbsp;</th>
+                                        }
+                                    </tr>
+                                </tbody>
+                                <tbody>
+                                    @foreach (var item in roles)
+                                    {
+                                        <tr>
+                                            <td>@item.RoleName</td>
+                                            @foreach (var type in permissionTypes)
+                                            {
+                                                <td align="center">
+
+                                                    <label class="custom-control custom-checkbox">
+                                                        <input name="permission_@(item.RoleId)" value="@(type.id)" type="checkbox" class="custom-control-input">
+                                                        <span class="custom-control-indicator"></span>
+                                                        <span class="custom-control-description"></span>
+                                                    </label>
+
+
+                                                </td>
+                                            }
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+
+                    <div class="sub-header-buttons">
+                        @{Html.RenderPartial("par_Crud");}
+                    </div>
+
+                </div>
+            </div>
+            
+         
+         
+        </div>
+    }

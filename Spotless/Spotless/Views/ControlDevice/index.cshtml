@@ -1,0 +1,1732 @@
+﻿<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.15.2/axios.js"></script>
+<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var controller = ViewContext.RouteData.Values["controller"].ToString().ToLower();
+    var permissions = (EPermission)ViewBag.Permissions;
+    var Logged_User = (UserProfile)ViewBag.LoggedUser;
+    var isAdmin = true;
+    var currentRoles = Roles.GetRolesForUser(Logged_User.UserName);
+    if (!currentRoles.Contains(ConfigurationManager.AppSettings["SuperAdminRoleName"]) && !currentRoles.Contains(ConfigurationManager.AppSettings["AdminRoleName"]))
+    {
+        isAdmin = false;
+    }
+
+}
+<style>
+    .div_float {
+        position: fixed;
+        background: #fff;
+        width: 95%;
+        z-index: 1000;
+        top: 65px;
+        padding: 10px;
+        border-bottom: 1px solid #aaa;
+    }
+
+    .div_float_bottom {
+        border-top: 0.5px solid rgb(159, 159, 159);
+        position: fixed;
+        background: #fff;
+        width: 95%;
+        z-index: 1000;
+        bottom: 0px;
+        padding: 10px;
+        border-bottom: 1px solid #aaa;
+    }
+
+    .col-xs6 {
+        width: 40% !important;
+    }
+
+    .margin-top-75 {
+        margin-top: 75px;
+    }
+
+    .btn-success {
+        margin-top: 5px;
+    }
+
+    .btn-primary {
+        margin-top: 5px;
+        margin-bottom: 5px;
+    }
+
+    .btn-danger {
+        margin-top: 5px;
+    }
+
+    .btn-no-mg-top {
+        margin-top: 0px !important;
+    }
+
+    .switch-label {
+        padding-right: 10px;
+        padding-top: 4px;
+    }
+
+    .clock {
+        text-align: center;
+    }
+</style>
+<script>
+    $(function () {
+        $(".k-grid-excel").click(function (e) {
+            // Prevent the default behavior which will prompt the user to save the generated file.
+            e.preventDefault();
+            // Get the Excel file as a data URL.
+            console.log('test');
+            var dataURL = new kendo.ooxml.Workbook(e.workbook).toDataURL();
+            // Strip the data URL prologue.
+            var base64 = dataURL.split(";base64,")[1];
+            // Post the base64 encoded content to the server which can save it.
+            $.post("Device/Excel_Export_Save", {
+                base64: base64,
+                fileName: "ExcelExport.xlsx"
+            }
+            , function (data) {
+                var url = 'data:application/vnd.ms-excel,' + encodeURIComponent(data);
+                location.href = url;
+                return false;
+            });
+        });
+    });
+    function BeautifulAlert(message) {
+        $("#AlertMessages").html(message);
+        $("#dialog").dialog({
+            modal: true
+        });
+    }
+</script>
+<script>
+    window.onload = function () {
+        var app3 = new Vue({
+            el: '#app-31',
+            data: {
+                seen: true,
+                DeviceId: "",
+                GroupId: "",
+                spinner:false,
+                spinner1:false,
+                status: {}
+            },
+            methods: {
+                ReadParameters: async function () {
+                    this.spinner =true;
+                    if(this.DeviceId == "") {
+                        BeautifulAlert("Please Select a Device Id!");
+                        return false;
+                    }
+                    await axios.get('@(Url.Content("~/controlDevice/GetDeviceParametersList/"))' + this.DeviceId)
+                    .then(response => {this.status = response.data.data;BeautifulAlert(response.data.message);this.spinner = false;});
+                    console.log(this.status);
+                },
+        WriteParametersOnDevice: async function () {
+            this.spinner =true;
+            if(this.DeviceId == "") {
+                BeautifulAlert("Please Select a Device Id!");
+                return false;
+            }
+            await axios.post('@(Url.Content("~/controlDevice/SaveDeviceParametersList/"))' + this.DeviceId,{"status":this.status})
+            .then(response => {BeautifulAlert(response.data.message);this.spinner =false;});
+            console.log(this.status);
+        },
+        WriteParametersOnStreet: async function () {
+            this.spinner1 =true;
+            if(this.GroupId == "") {
+                BeautifulAlert("Please Select a Street!");
+                return false;
+            }
+            await axios.post('@(Url.Content("~/controlDevice/SaveDeviceParametersListToGroup/"))' + this.GroupId,{"status":this.status})
+            .then(response => {BeautifulAlert(response.data.message);this.spinner1 = false;});
+            console.log(this.status);
+        },
+        button2_click : function(){
+            this.status.button1 = !this.status.button2;
+            console.log(this.status);
+        },
+        button4_click : function(){
+            this.status.button3 = !this.status.button4;
+            console.log(this.status);
+        },
+        button_click : function(value1,value2){
+            this.status[value2] = !this.status[value1];
+            console.log(this.status);
+        },
+        radioButtonChecked: function(value1,value2,value3,value4){
+
+                this.status[value1] = false;
+                this.status[value2] = false;
+                this.status[value3] = false;
+                this.status[value4] = true;
+                console.log(this.status);
+
+        }
+
+    }
+    })
+    }
+</script>
+
+<div id="app-31">
+    <div class="div_float">
+        <select name="Device" v-model="DeviceId" class="form-control col-md-3 col-sm-3 col-xs-6 col-xs6">
+            <option value="">Select Street Light</option>
+            @foreach (var Device in ViewBag.Devices)
+            {
+                <option value="@(Device.id)"> @Html.Raw(Device.deviceId) - @Html.Raw(Device.DeviceGroup.title) </option>
+            }
+
+        </select>
+        <button class="btn btn-success ml-15 btn-no-mg-top" v-on:click="ReadParameters">
+            Get Date
+        </button>
+        <button class="btn btn-success ml-15 btn-no-mg-top" :disabled="!status.textbox6"  v-on:click="WriteParametersOnDevice">
+            Apply
+        </button>
+        &nbsp;&nbsp;&nbsp; <i id="spinner" v-if="spinner == true" class="fa fa-refresh fa-spin fa-2x fa-fw " ></i>
+    </div>
+    <div class="div_float_bottom">
+        <select name="DeviceGroup" v-model="GroupId" class="form-control col-md-3 col-sm-3 col-xs-6 col-xs6">
+            <option value=""> Select a Street</option>
+            @foreach (var Street in ViewBag.DeviceGroups)
+            {
+                <option value="@(Street.Value)"> @Html.Raw(Street.Text) </option>
+            }
+
+        </select>
+        <button v-on:click="WriteParametersOnStreet" class="btn btn-success ml-15 btn-no-mg-top"  :disabled="!status.textbox6">
+            Apply to Street
+        </button>
+        &nbsp;&nbsp;&nbsp; <i id="spinner1" v-if="spinner1 == true" class="fa fa-refresh fa-spin fa-2x fa-fw " ></i>
+
+    </div>
+    <div class="container w-100 margin-top-75">
+        <div class="panel-group row w-100" id="accordion">
+
+            <div class="panel panel-default w-100">
+                <div class="panel-heading">
+                    <h4 class="panel-title">
+                        <a data-toggle="collapse" href="#collapse1">Charge Parameters:</a>
+                    </h4>
+                </div>
+                <div id="collapse1" class=" w-100 collapsed collapse show">
+                    <div class="panel-body w-100">
+
+                        <div class=" row w-100">
+                            <div class="col-sm-3">
+                                <div class="form-group">
+                                    <label for="Voltage_of_HVD">Voltage of HVD:</label>
+                                    <input name="Control0" v-model="status.textbox1" id="Voltage_of_HVD" class="form-control" type="number" />
+
+                                </div>
+                                <div class="form-group">
+                                    <label for="Lion_Charge">Lion Charge:</label>
+                                    <input name="Control1" v-model="status.textbox2" id="Lion_Charge" type="number" class="form-control" />
+                                </div>
+                                <div class="form-group">
+                                    <label for="Voltage_of_HVDR">Voltage of HVDR:</label>
+                                    <input name="Control2" v-model="status.textbox3" id="Voltage_of_HVDR" type="number" class="form-control" />
+                                </div>
+                                <div class="form-group">
+                                    <label for="Voltage_of_BOR">Voltage of BOR:</label>
+                                    <input name="Control3" v-model="status.textbox7" id="Voltage_of_BOR" type="number" class="form-control" />
+                                </div>
+
+                            </div>
+                            <div class="col-sm-3">
+                                <div class="form-group">
+                                    <label for="Voltage_of_BAL">Voltage of BAL:</label>
+                                    <input name="Control4" v-model="status.textbox4" id="Voltage_of_BAL" type="number" class="form-control" />
+                                </div>
+                                <div class="form-group">
+                                    <label for="Voltage_of_BOO">Voltage of BOO:</label>
+                                    <input name="Control5" v-model="status.textbox5" id="Voltage_of_BOO" type="number" class="form-control" />
+                                </div>
+                                <div class="form-group">
+                                    <label for="Voltage_of_FLO">Voltage of FLO:</label>
+                                    <input name="Control6" v-model="status.textbox6" id="Voltage_of_FLO" type="number" class="form-control" />
+                                </div>
+                            </div>
+                            <div class="col-sm-3">
+
+                                <div class="form-group">
+                                    <label for="Voltage_of_LVDR">Voltage of LVDR:</label>
+                                    <input name="Control7" v-model="status.textbox8" id="Voltage_of_LVDR" type="number" class="form-control" />
+                                </div>
+                                <div class="form-group">
+                                    <label for="Voltage_of_ECON">Voltage of ECON:</label>
+                                    <input name="Control8" v-model="status.textbox9" id="Voltage_of_ECON" type="number" class="form-control" />
+                                </div>
+                                <div class="form-group">
+                                    <label for="Voltage_of_ECOFF">Voltage of ECOFF:</label>
+                                    <input name="Control9" v-model="status.textbox10" id="Voltage_of_ECOFF" type="number" class="form-control" />
+                                </div>
+                            </div>
+                            <div class="col-sm-3">
+
+                                <div class="form-group">
+                                    <label for="LVD_of_LED">LVD of LED:</label>
+                                    <input name="Control10" v-model="status.textbox11" id="LVD_of_LED" type="number" class="form-control" />
+                                </div>
+                                <div class="form-group">
+                                    <label for="LVD_of_Load1">LVD of Load1:</label>
+                                    <input name="Control11" v-model="status.textbox12" id="LVD_of_Load1" type="number" class="form-control" />
+                                </div>
+                                <div class="form-group">
+                                    <label for="LVD_of_Load2">LVD of Load2:</label>
+                                    <input name="Control12" v-model="status.textbox13" id="LVD_of_Load2" type="number" class="form-control" />
+                                </div>
+                                <div class="form-group">
+                                    <label for="LVD_of_Load3">LVD of Load3:</label>
+                                    <input name="Control13" v-model="status.textbox14" id="LVD_of_Load3" type="number" class="form-control" />
+                                </div>
+                            </div>
+                        </div>
+
+
+
+                    </div>
+                </div>
+            </div>
+            <div class="panel panel-default w-100">
+                <div class="panel-heading">
+                    <h4 class="panel-title">
+                        <a data-toggle="collapse" href="#collapse3"> General Parameters:</a>
+                    </h4>
+                </div>
+                <div id="collapse3" class="w100 collapsed collapse show">
+
+                    <div class="panel-body">
+
+                        <div class="row w-100">
+                            <div class="col-sm-6 container">
+                                <div class="row container">
+                                    <div class="col-xs-9 container">
+                                        <label for="Max_Temp_of_Bat">Max Temp.of Bat:</label>
+                                    </div>
+                                    <div class="col-xs-3">
+
+                                    </div>
+                                </div>
+                                
+                                <div class="row container">
+                                    <div class="col-xs-9 container">
+                                        <input name="Control14" v-model="status.textbox18" id="Max_Temp_of_Bat" class="form-control" type="number" />
+                                    </div>
+                                    <div class="col-xs-3"> <P>&#8451;</P> </div>
+
+                                </div>
+                                <div class="row container">
+                                    <div class="col-xs-9 container">
+                                        <label for="Max_Temp_of_Con">Max Temp.  of Con:</label>
+                                    </div>
+                                    <div class="col-xs-3">
+
+                                    </div>
+                                </div>
+                                
+                                <div class="row container">
+                                    <div class="col-xs-9 container">
+                                        <input name="Control15" v-model="status.textbox20" id="Max_Temp_of_Con" type="number" class="form-control" />
+                                    </div>
+                                    <div class="col-xs-3"> <P>&#8451;</P> </div>
+                                </div>
+                                <div class="row container">
+                                    <div class="col-xs-9 container">
+                                        <label for="Work_Again_Temp">Work Again Temp	:</label>
+                                    </div>
+                                    <div class="col-xs-3">
+
+                                    </div>
+                                </div>
+                                
+                                <div class="row container">
+                                    <div class="col-xs-9 container">
+                                        <input name="Control16" v-model="status.textbox21" id="Work_Again_Temp" class="form-control" type="number" />
+                                    </div>
+                                    <div class="col-xs-3"> <P>&#8451;</P> </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="row container">
+                                    <div class="col-xs-9 container">
+                                        <label for="Night_Voltage">Night Voltage:</label>
+                                    </div>
+                                    <div class="col-xs-3">
+                                        
+                                    </div>
+                                </div>
+                                <div class="row container">
+                                    <div class="col-xs-9 container">
+                                        <input name="Control17" v-model="status.textbox22" id="Night_Voltage" type="number" class="form-control" />
+                                    </div>
+                                    <div class="col-xs-3">
+                                        V
+                                    </div>
+
+                                </div>
+
+                                <div class="row container">
+                                    <div class="col-xs-9 container">
+                                        <label for="Night_Delay">Night Delay:</label>
+                                    </div>
+                                    <div class="col-xs-3">
+
+                                    </div>
+                                </div>
+                                
+                                <div class="row container">
+                                    <div class="col-xs-9 container">
+                                        <input name="Control18" v-model="status.textbox23" id="Night_Delay" class="form-control" type="number" />
+                                    </div>
+                                    <div class="col-xs-3">
+                                        M
+                                    </div>
+
+
+                                </div>
+                                <div class="row container">
+                                    <div class="col-xs-9 container">
+                                        <label for="Day_Voltage">Day Voltage:</label>
+                                    </div>
+                                    <div class="col-xs-3">
+
+                                    </div>
+                                </div>
+                                
+                                <div class="row container">
+                                    <div class="col-xs-9 container">
+                                        <input name="Control19" v-model="status.textbox25" id="Day_Voltage" type="number" class="form-control" />
+                                    </div>
+                                    <div class="col-xs-3">
+                                        V
+                                    </div>
+
+                                </div>
+                                <div class="row container">
+                                    <div class="col-xs-9 container">
+                                        <label for="Day_Delay">Day Delay:</label>
+                                    </div>
+                                    <div class="col-xs-3">
+
+                                    </div>
+                                </div>
+                                
+                                <div class="row container">
+                                    <div class="col-xs-9 container">
+                                        <input name="Control20" v-model="status.textbox24" id="Day_Delay" class="form-control" type="number" />
+                                    </div>
+                                    <div class="col-xs-3">
+                                        M
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+        <h4> Descharge Parameters :</h4>
+
+        <div class="panel-group row w-100" id="accordion1">
+
+            <div class="panel panel-default w-100">
+                <div class="panel-heading">
+                    <h4 class="panel-title">
+                        <a data-toggle="collapse" href="#collapse4">LED Load:</a>
+                    </h4>
+                </div>
+                <div id="collapse4" class=" w-100 collapsed collapse show">
+                    <div class="panel-body">
+                        <div class="col-sm-3">
+                            <h4>Controle Mode:</h4>
+                            <div class="radio">
+                                <label><input v-model="status.radiobutton1" value="true"  v-on:change="radioButtonChecked('radiobutton2','radiobutton3','radiobutton4','radiobutton1')" type="radio">Manual</label>
+                            </div>
+                            <div class="radio">
+                                <label><input v-model="status.radiobutton2" value="true" v-on:change="radioButtonChecked('radiobutton1','radiobutton3','radiobutton4','radiobutton2')" type="radio">Light</label>
+                            </div>
+                            <div class="radio">
+                                <label><input v-model="status.radiobutton3" value="true" v-on:change="radioButtonChecked('radiobutton2','radiobutton1','radiobutton4','radiobutton3')" type="radio">Light and Delay</label>
+                            </div>
+                            <div class="radio">
+                                <label><input v-model="status.radiobutton4" value="true" v-on:change="radioButtonChecked('radiobutton2','radiobutton3','radiobutton1','radiobutton4')" type="radio">Realtime Clock</label>
+                            </div>
+
+                        </div>
+                        <div class="col-sm-9">
+                            <div class="row container">
+                                <br /><br />
+                            </div>
+                            <div class="row container col-md-12">
+                                <span class="switch-label"> ON/OFF </span>
+                                <label class="css-control css-control-warning  css-control-sm css-switch">
+                                    <input name="TurnOn" v-model="status.button2" id="chck_on" v-on:change="button2_click" type="checkbox" class="css-control-input">
+                                    <span class="css-control-indicator">  </span>
+                                </label>
+
+                                @*<button name="Control27" class="btn btn-success">ON</button>
+                                    <button name="Control28" class="btn btn-danger">OFF</button>*@
+                            </div>
+
+                            <div class="panel panel-default col-sm-6 mt-1">
+                                <div class="panel-heading">
+                                    <h4 class="panel-title">
+                                        <a data-toggle="collapse" href="#collapse9">Phase1:</a>
+                                    </h4>
+                                </div>
+                                <div id="collapse9" class="w-100 collapsed collapse show">
+                                    <div class="panel-body">
+                                        <div class="row container">
+                                            <div class="col-xs-9 container">
+                                                <input name="Control29" v-model="status.textbox26" id="Phase1_Hour" class="form-control" type="number" />
+                                            </div>
+                                            <label class="col-xs-3">Hour</label>
+                                        </div>
+                                        <div class="row container">
+                                            <div class="col-xs-9 container">
+                                                <input name="Control30" v-model="status.textbox27" id="Phase1_Minute" class="form-control" type="number" />
+                                            </div>
+
+                                            <label class="col-xs-3">Minute</label>
+
+
+                                        </div>
+
+                                        <label>Current :</label>
+                                        <div class="row container">
+                                            <div class="col-xs-9 container">
+                                                <input name="Control31" v-model="status.textbox28" id="Phase1_Current" class="form-control" type="number" />
+                                            </div>
+                                            <div class="col-xs-3">
+                                                <label>MA</label>
+                                            </div>
+                                        </div>
+
+
+
+
+                                    </div>
+
+                                </div>
+                            </div>
+                            <div class="panel panel-default col-sm-6">
+                                <div class="panel-heading">
+                                    <h4 class="panel-title">
+                                        <a data-toggle="collapse" href="#collapse10">Phase2:</a>
+                                    </h4>
+                                </div>
+                                <div id="collapse10" class="w-100 collapsed collapse show">
+                                    <div class="panel-body">
+
+                                        <div class="row container">
+                                            <div class="col-xs-9 container">
+                                                <input name="Control32" v-model="status.textbox31" id="phase2_Hour" class="form-control" type="number" />
+                                            </div>
+                                            <label class="col-xs-3">Hour</label>
+                                        </div>
+                                        <div class="row container">
+                                            <div class="col-xs-9 container">
+                                                <input name="Control33" v-model="status.textbox30" id="phase2_Minute" class="form-control" type="number" />
+                                            </div>
+                                            <label class="col-xs-3">Minute</label>
+                                        </div>
+
+                                        <label>Current :</label>
+                                        <div class="row container">
+                                            <div class="col-xs-9 container">
+                                                <input name="Control34" v-model="status.textbox29" id="phase2_Current" class="form-control" type="number" />
+                                            </div>
+                                            <div class="col-xs-3">
+                                                <label>MA</label>
+                                            </div>
+                                        </div>
+
+
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="panel panel-default col-sm-6">
+                                <div class="panel-heading">
+                                    <h4 class="panel-title">
+                                        <a data-toggle="collapse" href="#collapse11">Phase3:</a>
+                                    </h4>
+                                </div>
+                                <div id="collapse11" class=" w-100 collapsed collapse show">
+                                    <div class="panel-body">
+                                        <div class="row container">
+                                            <div class="col-xs-9 container">
+                                                <input name="Control35" v-model="status.textbox34" id="Phase3_Hour" class="form-control" type="number" />
+                                            </div>
+                                            <label class="col-xs-3">Hour</label>
+                                        </div>
+                                        <div class="row container">
+                                            <div class="col-xs-9 container">
+                                                <input name="Control36" v-model="status.textbox33" id="phase3_Minute" class="form-control" type="number" />
+                                            </div>
+                                            <label class="col-xs-3">Minute</label>
+                                        </div>
+
+                                        <label>Current :</label>
+                                        <div class="row container">
+                                            <div class="col-xs-9 container">
+                                                <input name="Control37" v-model="status.textbox32" id="phase3_Current" class="form-control" type="number" />
+                                            </div>
+                                            <div class="col-xs-3">
+                                                <label>MA</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+
+                            </div>
+
+                            <div class="panel panel-default col-sm-6">
+                                <div class="panel-heading">
+                                    <h4 class="panel-title">
+                                        <a data-toggle="collapse" href="#collapse12">Phase4:</a>
+                                    </h4>
+                                </div>
+                                <div id="collapse12" class=" w-100 collapsed collapse show">
+                                    <div class="panel-body">
+
+                                        <div class="row container">
+                                            <div class="col-xs-9 container">
+                                                <input name="Control38" v-model="status.textbox37" id="phase4_Hour" class="form-control" type="number" />
+                                            </div>
+                                            <label class="col-xs-3">Hour</label>
+                                        </div>
+                                        <div class="row container">
+                                            <div class="col-xs-9 container">
+                                                <input name="Control39" v-model="status.textbox36" id="phase4_Minute" class="form-control" type="number" />
+                                            </div>
+                                            <label class="col-xs-3">Minute</label>
+                                        </div>
+
+                                        <label>Current :</label>
+                                        <div class="row container">
+                                            <div class="col-xs-9 container">
+                                                <input name="Control40" v-model="status.textbox35" id="phase4_Current" class="form-control" type="number" />
+                                            </div>
+                                            <div class="col-xs-3">
+                                                <label>MA</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-xs-2">
+
+                                        </div>
+
+
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="panel panel-default col-sm-6">
+                                <div class="panel-heading">
+                                    <h4 class="panel-title">
+                                        <a data-toggle="collapse" href="#collapse13">Clock1:</a>
+                                    </h4>
+                                </div>
+                                <div id="collapse13" class=" w-100 collapsed collapse show">
+                                    <div class="panel-body">
+
+                                        <label class="row container">Start at:</label>
+                                        <div class="row container">
+                                            <div class="col-xs-3 clock">
+                                                <input name="Control41" v-model="status.textbox38" id="Start_at_hour1" class="form-control clock" type="number" />
+                                            </div>
+
+                                            <strong class="col-xs-1 clock"> : </strong>
+                                            <div class="col-xs-3 clock">
+                                                <input name="Control42" v-model="status.textbox39" id="Start_at_minute1" class="form-control clock" type="number" />
+                                            </div>
+
+                                            <strong class="col-xs-1 clock"> : </strong>
+                                            <div class="col-xs-3 clock">
+                                                <input name="Control43" v-model="status.textbox40" id="Start_at_second1" class="form-control clock" type="number" />
+                                            </div>
+
+
+                                        </div>
+                                        <label class="row container">Stop at:</label>
+                                        <div class="row container">
+
+                                            <div class="col-xs-3 clock">
+                                                <input name="Control44" v-model="status.textbox43" id="Stop_at_hour1" class="form-control clock" type="number" />
+                                            </div>
+
+                                            <strong class="col-xs-1 clock"> : </strong>
+                                            <div class="col-xs-3 clock">
+                                                <input name="Control45" v-model="status.textbox42" id="Stop_at_minute1" class="form-control clock" type="number" />
+                                            </div>
+
+                                            <strong class="col-xs-1 clock"> : </strong>
+                                            <div class="col-xs-3 clock">
+                                                <input name="Control46" v-model="status.textbox41" id="Stop_at_second1" class="form-control clock" type="number" />
+                                            </div>
+
+
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="panel panel-default col-sm-6">
+                                <div class="panel-heading">
+                                    <h4 class="panel-title">
+                                        <a data-toggle="collapse" href="#collapse14">Clock2:</a>
+                                    </h4>
+                                </div>
+                                <div id="collapse14" class=" w-100 collapsed collapse show">
+                                    <div class="panel-body" id="collapse14">
+
+                                        <label class="row container">Start at:</label>
+                                        <div class="row container">
+                                            <div class="col-xs-3 clock">
+                                                <input name="Control47" v-model="status.textbox49" id="Start_at_hour2" class="form-control clock" type="number" />
+                                            </div>
+
+                                            <strong class="col-xs-1 clock"> : </strong>
+                                            <div class="col-xs-3 clock">
+                                                <input name="Control48" v-model="status.textbox48" id="Start_at_minute2" class="form-control clock" type="number" />
+                                            </div>
+
+                                            <strong class="col-xs-1 clock"> : </strong>
+                                            <div class="col-xs-3 clock">
+                                                <input name="Control49" v-model="status.textbox47" id="Start_at_second2" class="form-control clock" type="number" />
+                                            </div>
+
+
+                                        </div>
+                                        <label class="row container">Stop at:</label>
+                                        <div class="row container">
+
+                                            <div class="col-xs-3 clock">
+                                                <input name="Control50" v-model="status.textbox46" id="Stop_at_hour2" class="form-control clock" type="number" />
+                                            </div>
+
+                                            <strong class="col-xs-1 clock"> : </strong>
+                                            <div class="col-xs-3 clock">
+                                                <input name="Control51" v-model="status.textbox45" id="Stop_at_minute2" class="form-control clock" type="number" />
+                                            </div>
+
+                                            <strong class="col-xs-1 clock"> : </strong>
+                                            <div class="col-xs-3 clock">
+                                                <input name="Control52" v-model="status.textbox44" id="Stop_at_second2" class="form-control clock" type="number" />
+                                            </div>
+
+
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="panel panel-default w-100">
+                <div class="panel-heading">
+                    <h4 class="panel-title">
+                        <a data-toggle="collapse" href="#collapse15">Load 1:</a>
+                    </h4>
+                </div>
+                <div id="collapse15" class=" w-100 collapsed collapse show">
+                    <div class="panel-body">
+                        <div class="col-sm-3">
+                            <h4>Controle Mode:</h4>
+                            <div class="radio">
+                                <label><input v-model="status.radiobutton8" value="true" v-on:change="radioButtonChecked('radiobutton7','radiobutton6','radiobutton5','radiobutton8')" type="radio">Manual</label>
+                            </div>
+                            <div class="radio">
+                                <label><input v-model="status.radiobutton7" value="true" v-on:change="radioButtonChecked('radiobutton8','radiobutton6','radiobutton5','radiobutton7')" name="Control54" type="radio">Light</label>
+                            </div>
+                            <div class="radio">
+                                <label><input v-model="status.radiobutton6" value="true" v-on:change="radioButtonChecked('radiobutton7','radiobutton8','radiobutton5','radiobutton6')" type="radio">Light and Delay</label>
+                            </div>
+                            <div class="radio">
+                                <label><input v-model="status.radiobutton5" value="true" v-on:change="radioButtonChecked('radiobutton7','radiobutton6','radiobutton8','radiobutton5')" type="radio">Realtime Clock</label>
+                            </div>
+
+                        </div>
+                        <div class="col-sm-9">
+                            <div class="row container">
+                                <br /><br />
+                            </div>
+                            <div class="row container col-md-12">
+                                <span class="switch-label"> ON/OFF </span>
+                                <label class="css-control css-control-warning  css-control-sm css-switch">
+                                    <input name="TurnOn" v-model="status.button4" id="chck_on" v-on:change="button4_click" type="checkbox" class="css-control-input">
+                                    <span class="css-control-indicator"></span>
+                                </label>
+                            </div>
+
+                            <div class="panel panel-default col-sm-6 mt-1">
+                                <div class="panel-heading">
+                                    <h4 class="panel-title">
+                                        <a data-toggle="collapse" href="#collapse16">Phase1:</a>
+                                    </h4>
+
+                                </div>
+                                <div id="collapse16" class=" w-100 collapsed collapse show">
+                                    <div class="panel-body">
+                                        <div class="row container">
+                                            <div class="col-xs-9 container">
+                                                <input name="Control59" v-model="status.textbox75" id="Phase1_Hour_lo1" class="form-control" type="number" />
+                                            </div>
+                                            <label class="col-xs-3">Hour</label>
+                                        </div>
+                                        <div class="row container">
+                                            <div class="col-xs-9 container">
+                                                <input name="Control60" v-model="status.textbox72" id="Phase1_Minute_lo1" class="form-control" type="number" />
+                                            </div>
+
+                                            <label class="col-xs-3">Minute</label>
+                                        </div>
+                                        <div class="row container">
+                                            <div class="container-fluid">
+                                                <span class="switch-label"> ON/OFF </span>
+                                                <label class="css-control css-control-warning  css-control-sm css-switch">
+                                                    <input name="TurnOn" v-model="status.button11" id="chck_on" v-on:change="button_click('button11','button12')" type="checkbox" class="css-control-input">
+                                                    <span class="css-control-indicator"></span>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                            <div class="panel panel-default col-sm-6">
+                                <div class="panel-heading">
+                                    <h4 class="panel-title">
+                                        <a data-toggle="collapse" href="#collapse17">Phase2:</a>
+                                    </h4>
+                                </div>
+                                <div id="collapse17" class=" w-100 collapsed collapse show">
+                                    <div class="panel-body">
+
+                                        <div class="row container">
+                                            <div class="col-xs-9 container">
+                                                <input name="Control63"  v-model="status.textbox68" id="phase2_Hour_lo1" class="form-control" type="number" />
+                                            </div>
+                                            <label class="col-xs-3">Hour</label>
+                                        </div>
+                                        <div class="row container">
+                                            <div class="col-xs-9 container">
+                                                <input name="Control64"  v-model="status.textbox65" id="phase2_Minute_lo1" class="form-control" type="number" />
+                                            </div>
+                                            <label class="col-xs-3">Minute</label>
+                                        </div>
+                                        <div class="row container">
+                                            <div class="container-fluid">
+                                                <span class="switch-label"> ON/OFF </span>
+                                                <label class="css-control css-control-warning  css-control-sm css-switch">
+                                                    <input name="TurnOn" v-model="status.button14" id="chck_on" v-on:change="button_click('button14','button13')" type="checkbox" class="css-control-input">
+                                                    <span class="css-control-indicator"></span>
+                                                </label>
+                                            </div>
+                                        </div>
+
+
+
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="panel panel-default col-sm-6">
+                                <div class="panel-heading">
+                                    <h4 class="panel-title">
+                                        <a data-toggle="collapse" href="#collapse18">Phase3:</a>
+                                    </h4>
+                                </div>
+                                <div id="collapse18" class=" w-100 collapsed collapse show">
+                                    <div class="panel-body">
+                                        <div class="row container">
+                                            <div class="col-xs-9 container">
+                                                <input name="Control67" v-model="status.textbox82" id="Phase3_Hour_lo1" class="form-control" type="number" />
+                                            </div>
+                                            <label class="col-xs-3">Hour</label>
+                                        </div>
+                                        <div class="row container">
+                                            <div class="col-xs-9 container">
+                                                <input name="Control68" v-model="status.textbox84" id="phase3_Minute_lo1" class="form-control" type="number" />
+                                            </div>
+                                            <label class="col-xs-3">Minute</label>
+                                        </div>
+                                        <div class="row container">
+                                            <div class="container-fluid">
+                                                <span class="switch-label"> ON/OFF </span>
+                                                <label class="css-control css-control-warning  css-control-sm css-switch">
+                                                    <input name="TurnOn" v-model="status.button16" id="chck_on" v-on:change="button_click('button16','button15')" type="checkbox" class="css-control-input">
+                                                    <span class="css-control-indicator"></span>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+
+                            </div>
+                            <div class="panel panel-default col-sm-6">
+                                <div class="panel-heading">
+                                    <h4 class="panel-title">
+                                        <a data-toggle="collapse" href="#collapse19">Phase4:</a>
+                                    </h4>
+                                </div>
+                                <div id="collapse19" class=" w-100 collapsed collapse show">
+                                    <div class="panel-body">
+
+                                        <div class="row container">
+                                            <div class="col-xs-9 container">
+                                                <input name="Control71" v-model="status.textbox87" id="phase4_Hour_lo1" class="form-control" type="number" />
+                                            </div>
+                                            <label class="col-xs-3">Hour</label>
+                                        </div>
+                                        <div class="row container">
+                                            <div class="col-xs-9 container">
+                                                <input name="Control72" v-model="status.textbox89" id="phase4_Minute_lo1" class="form-control" type="number" />
+                                            </div>
+                                            <label class="col-xs-3">Minute</label>
+                                        </div>
+                                        <div class="row container">
+                                            <div class="container-fluid">
+                                                <span class="switch-label"> ON/OFF </span>
+                                                <label class="css-control css-control-warning  css-control-sm css-switch">
+                                                    <input name="TurnOn" v-model="status.button18" id="chck_on" v-on:change="button_click('button18','button17')" type="checkbox" class="css-control-input">
+                                                    <span class="css-control-indicator"></span>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                            <div class="panel panel-default col-sm-6">
+                                <div class="panel-heading">
+                                    <h4 class="panel-title">
+                                        <a data-toggle="collapse" href="#collapse20">Clock1:</a>
+                                    </h4>
+                                </div>
+                                <div id="collapse20" class=" w-100 collapsed collapse show">
+                                    <div class="panel-body">
+
+                                        <label class="row container">Start at:</label>
+                                        <div class="row container">
+                                            <div class="col-xs-3 clock">
+                                                <input name="Control75" v-model="status.textbox93" id="Start_at_hour1_lo1" class="form-control clock" type="number" />
+                                            </div>
+
+                                            <strong class="col-xs-1 clock">:</strong>
+                                            <div class="col-xs-3 clock">
+                                                <input name="Control76" v-model="status.textbox95" id="Start_at_minute1_lo1" class="form-control clock" type="number" />
+                                            </div>
+
+                                            <strong class="col-xs-1 clock">:</strong>
+                                            <div class="col-xs-3 clock">
+                                                <input name="Control77" v-model="status.textbox96" id="Start_at_second1_lo1" class="form-control clock" type="number" />
+                                            </div>
+
+
+                                        </div>
+                                        <label class="row container">Stop at:</label>
+                                        <div class="row container">
+
+                                            <div class="col-xs-3 clock">
+                                                <input name="Control78" v-model="status.textbox94" id="Stop_at_hour1_lo1" class="form-control clock" type="number" />
+                                            </div>
+
+                                            <strong class="col-xs-1 clock">:</strong>
+                                            <div class="col-xs-3 clock">
+                                                <input name="Control79" v-model="status.textbox93" id="Stop_at_minute1_lo1" class="form-control clock" type="number" />
+                                            </div>
+
+                                            <strong class="col-xs-1 clock">:</strong>
+                                            <div class="col-xs-3 clock">
+                                                <input name="Control80" v-model="status.textbox91" id="Stop_at_second1_lo1" class="form-control clock" type="number" />
+                                            </div>
+
+
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="panel panel-default col-sm-6">
+                                <div class="panel-heading">
+                                    <h4 class="panel-title">
+                                        <a data-toggle="collapse" href="#collapse22">Clock2:</a>
+                                    </h4>
+                                </div>
+                                <div id="collapse22" class=" w-100 collapsed collapse show">
+                                    <div class="panel-body">
+
+                                        <label class="row container">Start at:</label>
+                                        <div class="row container">
+                                            <div class="col-xs-3 clock">
+                                                <input name="Control81" v-model="status.textbox88" id="Start_at_hour2_lo1" class="form-control clock" type="number" />
+                                            </div>
+
+                                            <strong class="col-xs-1 clock">:</strong>
+                                            <div class="col-xs-3 clock">
+                                                <input name="Control82" v-model="status.textbox86" id="Start_at_minute2_lo1" class="form-control clock" type="number" />
+                                            </div>
+
+                                            <strong class="col-xs-1 clock">:</strong>
+                                            <div class="col-xs-3 clock">
+                                                <input name="Control83" v-model="status.textbox85" id="Start_at_second2_lo1" class="form-control clock" type="number" />
+                                            </div>
+
+
+                                        </div>
+                                        <label class="row container">Stop at:</label>
+                                        <div class="row container">
+
+                                            <div class="col-xs-3 clock">
+                                                <input name="Control84" v-model="status.textbox83" id="Stop_at_hour2-lo1" class="form-control clock" type="number" />
+                                            </div>
+
+                                            <strong class="col-xs-1 clock">:</strong>
+                                            <div class="col-xs-3 clock">
+                                                <input name="Control85" v-model="status.textbox81" id="Stop_at_minute2_lo1" class="form-control clock" type="number" />
+                                            </div>
+
+                                            <strong class="col-xs-1 clock">:</strong>
+                                            <div class="col-xs-3 clock">
+                                                <input name="Control86" v-model="status.textbox80" id="Stop_at_second2-lo1" class="form-control clock" type="number" />
+                                            </div>
+
+
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel panel-default w-100">
+                <div class="panel-heading">
+                    <h4 class="panel-title">
+                        <a data-toggle="collapse" href="#collapse23">Load 2:</a>
+                    </h4>
+                </div>
+                <div id="collapse23" class=" w-100 collapsed collapse show">
+                    <div class="panel-body">
+                        <div class="col-sm-3">
+                            <h4>Controle Mode:</h4>
+                            <div class="radio">
+                                <label><input v-model="status.radiobutton20" value="true" v-on:change="radioButtonChecked('radiobutton19','radiobutton18','radiobutton17','radiobutton20')" name="Control87" type="radio">Manual</label>
+                            </div>
+                            <div class="radio">
+                                <label><input v-model="status.radiobutton19" value="true" v-on:change="radioButtonChecked('radiobutton20','radiobutton18','radiobutton17','radiobutton19')" name="Control88" type="radio">Light</label>
+                            </div>
+                            <div class="radio">
+                                <label><input v-model="status.radiobutton18" value="true" v-on:change="radioButtonChecked('radiobutton19','radiobutton20','radiobutton17','radiobutton18')" name="Control89" type="radio">Light and Delay</label>
+                            </div>
+                            <div class="radio">
+                                <label><input v-model="status.radiobutton17" value="true" v-on:change="radioButtonChecked('radiobutton19','radiobutton18','radiobutton20','radiobutton17')" name="Control90" type="radio">Realtime Clock</label>
+                            </div>
+
+                        </div>
+                        <div class="col-sm-9">
+                            <div class="row container">
+                                <br /><br />
+                            </div>
+                            <div class="row container col-md-12">
+                                <span class="switch-label"> ON/OFF </span>
+                                <label class="css-control css-control-warning  css-control-sm css-switch">
+                                    <input name="TurnOn" v-model="status.button6" id="chck_on" v-on:change="button_click('button6','button5')" type="checkbox" class="css-control-input">
+                                    <span class="css-control-indicator"></span>
+                                </label>
+                            </div>
+
+                            <div class="panel panel-default col-sm-6 mt-1">
+                                <div class="panel-heading">
+                                    <h4 class="panel-title">
+                                        <a data-toggle="collapse" href="#collapse24">Phase1:</a>
+                                    </h4>
+
+                                </div>
+                                <div id="collapse24" class=" w-100 collapsed collapse show">
+                                    <div class="panel-body">
+                                        <div class="row container">
+                                            <div class="col-xs-9 container">
+                                                <input name="Control93" v-model="status.textbox105" id="Phase1_Hour_lo2" class="form-control" type="number" />
+                                            </div>
+                                            <label class="col-xs-3">Hour</label>
+                                        </div>
+                                        <div class="row container">
+                                            <div class="col-xs-9 container">
+                                                <input name="Control94" v-model="status.textbox102" id="Phase1_Minute_lo2" class="form-control" type="number" />
+                                            </div>
+
+                                            <label class="col-xs-3">Minute</label>
+                                        </div>
+                                        <div class="row container">
+                                            <div class="container-fluid">
+                                                <span class="switch-label"> ON/OFF </span>
+                                                <label class="css-control css-control-warning  css-control-sm css-switch">
+                                                    <input name="TurnOn" v-model="status.button34" id="chck_on" v-on:change="button_click('button34','button33')" type="checkbox" class="css-control-input">
+                                                    <span class="css-control-indicator"></span>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                            <div class="panel panel-default col-sm-6">
+                                <div class="panel-heading">
+                                    <h4 class="panel-title">
+                                        <a data-toggle="collapse" href="#collapse25">Phase2:</a>
+                                    </h4>
+                                </div>
+                                <div id="collapse25" class=" w-100 collapsed collapse show">
+                                    <div class="panel-body">
+
+                                        <div class="row container">
+                                            <div class="col-xs-9 container">
+                                                <input name="Control97" v-model="status.textbox99" id="phase2_Hour_lo2" class="form-control" type="number" />
+                                            </div>
+                                            <label class="col-xs-3">Hour</label>
+                                        </div>
+                                        <div class="row container">
+                                            <div class="col-xs-9 container">
+                                                <input name="Control98" v-model="status.textbox90" id="phase2_Minute_lo2" class="form-control" type="number" />
+                                            </div>
+                                            <label class="col-xs-3">Minute</label>
+                                        </div>
+                                        <div class="row container">
+                                            <div class="container-fluid">
+                                                <span class="switch-label"> ON/OFF </span>
+                                                <label class="css-control css-control-warning  css-control-sm css-switch">
+                                                    <input name="TurnOn" v-model="status.button32" id="chck_on" v-on:change="button_click('button32','button31')" type="checkbox" class="css-control-input">
+                                                    <span class="css-control-indicator"></span>
+                                                </label>
+                                            </div>
+                                        </div>
+
+
+
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="panel panel-default col-sm-6">
+                                <div class="panel-heading">
+                                    <h4 class="panel-title">
+                                        <a data-toggle="collapse" href="#collapse26">Phase3:</a>
+                                    </h4>
+                                </div>
+                                <div id="collapse26" class=" w-100 collapsed collapse show">
+                                    <div class="panel-body">
+                                        <div class="row container">
+                                            <div class="col-xs-9 container">
+                                                <input name="Control101" v-model="status.textbox111" id="Phase3_Hour_lo2" class="form-control" type="number" />
+                                            </div>
+                                            <label class="col-xs-3">Hour</label>
+                                        </div>
+                                        <div class="row container">
+                                            <div class="col-xs-9 container">
+                                                <input name="Control102" v-model="status.textbox113" id="phase3_Minute_lo2" class="form-control" type="number" />
+                                            </div>
+                                            <label class="col-xs-3">Minute</label>
+                                        </div>
+                                        <div class="row container">
+                                            <div class="container-fluid">
+                                                <span class="switch-label"> ON/OFF </span>
+                                                <label class="css-control css-control-warning  css-control-sm css-switch">
+                                                    <input name="TurnOn" v-model="status.button30" id="chck_on" v-on:change="button_click('button30','button29')" type="checkbox" class="css-control-input">
+                                                    <span class="css-control-indicator"></span>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+
+                            </div>
+                            <div class="panel panel-default col-sm-6">
+                                <div class="panel-heading">
+                                    <h4 class="panel-title">
+                                        <a data-toggle="collapse" href="#collapse27">Phase4:</a>
+                                    </h4>
+                                </div>
+                                <div id="collapse27" class=" w-100 collapsed collapse show">
+                                    <div class="panel-body">
+
+                                        <div class="row container">
+                                            <div class="col-xs-9 container">
+                                                <input name="Control105" v-model="status.textbox116" id="phase4_Hour_lo2" class="form-control" type="number" />
+                                            </div>
+                                            <label class="col-xs-3">Hour</label>
+                                        </div>
+                                        <div class="row container">
+                                            <div class="col-xs-9 container">
+                                                <input name="Control106" v-model="status.textbox118" id="phase4_Minute_lo2" class="form-control" type="number" />
+                                            </div>
+                                            <label class="col-xs-3">Minute</label>
+                                        </div>
+                                        <div class="row container">
+                                            <div class="container-fluid">
+                                                <span class="switch-label"> ON/OFF </span>
+                                                <label class="css-control css-control-warning  css-control-sm css-switch">
+                                                    <input name="TurnOn" v-model="status.button28" id="chck_on" v-on:change="button_click('button28','button27')" type="checkbox" class="css-control-input">
+                                                    <span class="css-control-indicator"></span>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                            <div class="panel panel-default col-sm-6">
+                                <div class="panel-heading">
+                                    <h4 class="panel-title">
+                                        <a data-toggle="collapse" href="#collapse28">Clock1:</a>
+                                    </h4>
+                                </div>
+                                <div id="collapse28" class=" w-100 collapsed collapse show">
+                                    <div class="panel-body">
+
+                                        <label class="row container">Start at:</label>
+                                        <div class="row container">
+                                            <div class="col-xs-3 clock">
+                                                <input name="Control109" v-model="status.textbox121" id="Start_at_hour1_lo2" class="form-control clock" type="number" />
+                                            </div>
+
+                                            <strong class="col-xs-1 clock">:</strong>
+                                            <div class="col-xs-3 clock">
+                                                <input name="Control110" v-model="status.textbox123" id="Start_at_minute1_lo2" class="form-control clock" type="number" />
+                                            </div>
+
+                                            <strong class="col-xs-1 clock">:</strong>
+                                            <div class="col-xs-3 clock">
+                                                <input name="Control111" v-model="status.textbox124" id="Start_at_second1_lo2" class="form-control clock" type="number" />
+                                            </div>
+
+
+                                        </div>
+                                        <label class="row container">Stop at:</label>
+                                        <div class="row container">
+
+                                            <div class="col-xs-3 clock">
+                                                <input name="Control112" v-model="status.textbox122" id="Stop_at_hour1_lo2" class="form-control clock" type="number" />
+                                            </div>
+
+                                            <strong class="col-xs-1 clock">:</strong>
+                                            <div class="col-xs-3 clock">
+                                                <input name="Control113" v-model="status.textbox120" id="Stop_at_minute1_lo2" class="form-control clock" type="number" />
+                                            </div>
+
+                                            <strong class="col-xs-1 clock">:</strong>
+                                            <div class="col-xs-3 clock">
+                                                <input name="Control114" v-model="status.textbox119" id="Stop_at_second1_lo2" class="form-control clock" type="number" />
+                                            </div>
+
+
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="panel panel-default col-sm-6">
+                                <div class="panel-heading">
+                                    <h4 class="panel-title">
+                                        <a data-toggle="collapse" href="#collapse29">Clock2:</a>
+                                    </h4>
+                                </div>
+                                <div id="collapse29" class=" w-100 collapsed collapse show">
+                                    <div class="panel-body">
+
+                                        <label class="row container">Start at:</label>
+                                        <div class="row container">
+                                            <div class="col-xs-3 clock">
+                                                <input name="Control115" v-model="status.textbox117" id="Start_at_hour2_lo2" class="form-control clock" type="number" />
+                                            </div>
+
+                                            <strong class="col-xs-1 clock">:</strong>
+                                            <div class="col-xs-3 clock">
+                                                <input name="Control116" v-model="status.textbox115" id="Start_at_minute2_lo2" class="form-control clock" type="number" />
+                                            </div>
+
+                                            <strong class="col-xs-1 clock">:</strong>
+                                            <div class="col-xs-3 clock">
+                                                <input name="Control117" v-model="status.textbox114" id="Start_at_second2_lo2" class="form-control clock" type="number" />
+                                            </div>
+
+
+                                        </div>
+                                        <label class="row container">Stop at:</label>
+                                        <div class="row container">
+
+                                            <div class="col-xs-3 clock">
+                                                <input name="Control118" v-model="status.textbox112" id="Stop_at_hour2-lo2" class="form-control clock" type="number" />
+                                            </div>
+
+                                            <strong class="col-xs-1 clock">:</strong>
+                                            <div class="col-xs-3 clock">
+                                                <input name="Control119" v-model="status.textbox110" id="Stop_at_minute2_lo2" class="form-control clock" type="number" />
+                                            </div>
+
+                                            <strong class="col-xs-1 clock">:</strong>
+                                            <div class="col-xs-3 clock">
+                                                <input name="Control120" v-model="status.textbox109" id="Stop_at_second2-lo2" class="form-control clock" type="number" />
+                                            </div>
+
+
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="panel panel-default w-100">
+                <div class="panel-heading">
+                    <h4 class="panel-title">
+                        <a data-toggle="collapse" href="#collapse30">Load 3:</a>
+                    </h4>
+                </div>
+                <div id="collapse30" class=" w-100 collapsed collapse show">
+                    <div class="panel-body">
+                        <div class="col-sm-3">
+                            <h4>Controle Mode:</h4>
+                            <div class="radio">
+                                <label><input type="radio" v-model="status.radiobutton28" value="true" v-on:change="radioButtonChecked('radiobutton27','radiobutton26','radiobutton25','radiobutton28')" name="Control121">Manual</label>
+                            </div>
+                            <div class="radio">
+                                <label><input type="radio" v-model="status.radiobutton27" value="true" v-on:change="radioButtonChecked('radiobutton28','radiobutton26','radiobutton25','radiobutton27')" name="Control122">Light</label>
+                            </div>
+                            <div class="radio">
+                                <label><input type="radio" v-model="status.radiobutton26" value="true" v-on:change="radioButtonChecked('radiobutton27','radiobutton28','radiobutton25','radiobutton26')" name="Control123">Light and Delay</label>
+                            </div>
+                            <div class="radio">
+                                <label><input type="radio" v-model="status.radiobutton25" value="true" v-on:change="radioButtonChecked('radiobutton27','radiobutton26','radiobutton28','radiobutton25')" name="Control124">Realtime Clock</label>
+                            </div>
+
+                        </div>
+                        <div class="col-sm-9">
+                            <div class="row container">
+                                <br /><br />
+                            </div>
+                            <div class="row container col-md-12">
+                                <span class="switch-label"> ON/OFF </span>
+                                <label class="css-control css-control-warning  css-control-sm css-switch">
+                                    <input name="TurnOn" v-model="status.button8" id="chck_on" v-on:change="button_click('button8','button7')" type="checkbox" class="css-control-input">
+                                    <span class="css-control-indicator"></span>
+                                </label>
+                            </div>
+
+                            <div class="panel panel-default col-sm-6 mt-1">
+                                <div class="panel-heading">
+                                    <h4 class="panel-title">
+                                        <a data-toggle="collapse" href="#collapse31">Phase1:</a>
+                                    </h4>
+
+                                </div>
+                                <div id="collapse31" class=" w-100 collapsed collapse show">
+                                    <div class="panel-body">
+                                        <div class="row container">
+                                            <div class="col-xs-9 container">
+                                                <input name="Control127"  v-model="status.textbox137" id="Phase1_Hour_lo3" class="form-control" type="number" />
+                                            </div>
+                                            <label class="col-xs-3">Hour</label>
+                                        </div>
+                                        <div class="row container">
+                                            <div class="col-xs-9 container">
+                                                <input name="Control128"  v-model="status.textbox134" id="Phase1_Minute_lo3" class="form-control" type="number" />
+                                            </div>
+
+                                            <label class="col-xs-3">Minute</label>
+                                        </div>
+                                        <div class="row container">
+                                            <div class="container-fluid">
+                                                <span class="switch-label"> ON/OFF </span>
+                                                <label class="css-control css-control-warning  css-control-sm css-switch">
+                                                    <input name="TurnOn" v-model="status.button26" id="chck_on" v-on:change="button_click('button26','button25')" type="checkbox" class="css-control-input">
+                                                    <span class="css-control-indicator"></span>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                            <div class="panel panel-default col-sm-6">
+                                <div class="panel-heading">
+                                    <h4 class="panel-title">
+                                        <a data-toggle="collapse" href="#collapse32">Phase2:</a>
+                                    </h4>
+                                </div>
+                                <div id="collapse32" class=" w-100 collapsed collapse show">
+                                    <div class="panel-body">
+
+                                        <div class="row container">
+                                            <div class="col-xs-9 container">
+                                                <input name="Control131"  v-model="status.textbox131" id="phase2_Hour_lo3" class="form-control" type="number" />
+                                            </div>
+                                            <label class="col-xs-3">Hour</label>
+                                        </div>
+                                        <div class="row container">
+                                            <div class="col-xs-9 container">
+                                                <input name="Control132"  v-model="status.textbox128" id="phase2_Minute_lo3" class="form-control" type="number" />
+                                            </div>
+                                            <label class="col-xs-3">Minute</label>
+                                        </div>
+                                        <div class="row container">
+                                            <div class="container-fluid">
+                                                <span class="switch-label"> ON/OFF </span>
+                                                <label class="css-control css-control-warning  css-control-sm css-switch">
+                                                    <input name="TurnOn" v-model="status.button24" id="chck_on" v-on:change="button_click('button24','button23')" type="checkbox" class="css-control-input">
+                                                    <span class="css-control-indicator"></span>
+                                                </label>
+                                            </div>
+                                        </div>
+
+
+
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="panel panel-default col-sm-6">
+                                <div class="panel-heading">
+                                    <h4 class="panel-title">
+                                        <a data-toggle="collapse" href="#collapse33">Phase3:</a>
+                                    </h4>
+                                </div>
+                                <div id="collapse33" class=" w-100 collapsed collapse show">
+                                    <div class="panel-body">
+                                        <div class="row container">
+                                            <div class="col-xs-9 container">
+                                                <input name="Control135"  v-model="status.textbox143" id="Phase3_Hour_lo3" class="form-control" type="number" />
+                                            </div>
+                                            <label class="col-xs-3">Hour</label>
+                                        </div>
+                                        <div class="row container">
+                                            <div class="col-xs-9 container">
+                                                <input name="Control136"  v-model="status.textbox145" id="phase3_Minute_lo3" class="form-control" type="number" />
+                                            </div>
+                                            <label class="col-xs-3">Minute</label>
+                                        </div>
+                                        <div class="row container">
+                                            <div class="container-fluid">
+                                                <span class="switch-label"> ON/OFF </span>
+                                                <label class="css-control css-control-warning  css-control-sm css-switch">
+                                                    <input name="TurnOn" v-model="status.button22" id="chck_on" v-on:change="button_click('button22','button21')" type="checkbox" class="css-control-input">
+                                                    <span class="css-control-indicator"></span>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+
+                            </div>
+                            <div class="panel panel-default col-sm-6">
+                                <div class="panel-heading">
+                                    <h4 class="panel-title">
+                                        <a data-toggle="collapse" href="#collapse34">Phase4:</a>
+                                    </h4>
+                                </div>
+                                <div id="collapse34" class=" w-100 collapsed collapse show">
+                                    <div class="panel-body">
+
+                                        <div class="row container">
+                                            <div class="col-xs-9 container">
+                                                <input name="Control139"  v-model="status.textbox148" id="phase4_Hour_lo3" class="form-control" type="number" />
+                                            </div>
+                                            <label class="col-xs-3">Hour</label>
+                                        </div>
+                                        <div class="row container">
+                                            <div class="col-xs-9 container">
+                                                <input name="Control140"  v-model="status.textbox150" id="phase4_Minute_lo3" class="form-control" type="number" />
+                                            </div>
+                                            <label class="col-xs-3">Minute</label>
+                                        </div>
+                                        <div class="row container">
+                                            <div class="container-fluid">
+                                                <span class="switch-label"> ON/OFF </span>
+                                                <label class="css-control css-control-warning  css-control-sm css-switch">
+                                                    <input name="TurnOn" v-model="status.button20" id="chck_on" v-on:change="button_click('button20','button19')" type="checkbox" class="css-control-input">
+                                                    <span class="css-control-indicator"></span>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                            <div class="panel panel-default col-sm-6">
+                                <div class="panel-heading">
+                                    <h4 class="panel-title">
+                                        <a data-toggle="collapse" href="#collapse35">Clock1:</a>
+                                    </h4>
+                                </div>
+                                <div id="collapse35" class=" w-100 collapsed collapse show">
+                                    <div class="panel-body">
+
+                                        <label class="row container">Start at:</label>
+                                        <div class="row container">
+                                            <div class="col-xs-3 clock">
+                                                <input name="Control143"  v-model="status.textbox153" id="Start_at_hour1_lo3" class="form-control clock" type="number" />
+                                            </div>
+
+                                            <strong class="col-xs-1 clock">:</strong>
+                                            <div class="col-xs-3 clock">
+                                                <input name="Control144"  v-model="status.textbox155" id="Start_at_minute1_lo3" class="form-control clock" type="number" />
+                                            </div>
+
+                                            <strong class="col-xs-1 clock">:</strong>
+                                            <div class="col-xs-3 clock">
+                                                <input name="Control145"  v-model="status.textbox156" id="Start_at_second1_lo3" class="form-control clock" type="number" />
+                                            </div>
+
+
+                                        </div>
+                                        <label class="row container">Stop at:</label>
+                                        <div class="row container">
+
+                                            <div class="col-xs-3 clock">
+                                                <input name="Control146"  v-model="status.textbox154" id="Stop_at_hour1_lo3" class="form-control clock" type="number" />
+                                            </div>
+
+                                            <strong class="col-xs-1 clock">:</strong>
+                                            <div class="col-xs-3 clock">
+                                                <input name="Control147"  v-model="status.textbox152" id="Stop_at_minute1_lo3" class="form-control clock" type="number" />
+                                            </div>
+
+                                            <strong class="col-xs-1 clock">:</strong>
+                                            <div class="col-xs-3 clock">
+                                                <input name="Control148"  v-model="status.textbox151" id="Stop_at_second1_lo3" class="form-control clock" type="number" />
+                                            </div>
+
+
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="panel panel-default col-sm-6">
+                                <div class="panel-heading">
+                                    <h4 class="panel-title">
+                                        <a data-toggle="collapse" href="#collapse36">Clock2:</a>
+                                    </h4>
+                                </div>
+                                <div id="collapse36" class=" w-100 collapsed collapse show">
+                                    <div class="panel-body">
+
+                                        <label class="row container">Start at:</label>
+                                        <div class="row container">
+                                            <div class="col-xs-3 clock">
+                                                <input name="Control149"  v-model="status.textbox149" id="Start_at_hour2_lo3" class="form-control clock" type="number" />
+                                            </div>
+
+                                            <strong class="col-xs-1 clock">:</strong>
+                                            <div class="col-xs-3 clock">
+                                                <input name="Control150"  v-model="status.textbox147" id="Start_at_minute2_lo3" class="form-control clock" type="number" />
+                                            </div>
+
+                                            <strong class="col-xs-1 clock">:</strong>
+                                            <div class="col-xs-3 clock">
+                                                <input name="Control151"  v-model="status.textbox146" id="Start_at_second2_lo3" class="form-control clock" type="number" />
+                                            </div>
+
+
+                                        </div>
+                                        <label class="row container">Stop at:</label>
+                                        <div class="row container">
+
+                                            <div class="col-xs-3 clock">
+                                                <input name="Control152"  v-model="status.textbox144" id="Stop_at_hour2-lo3" class="form-control clock" type="number" />
+                                            </div>
+
+                                            <strong class="col-xs-1 clock">:</strong>
+                                            <div class="col-xs-3 clock">
+                                                <input name="Control153"  v-model="status.textbox142" id="Stop_at_minute2_lo3" class="form-control clock" type="number" />
+                                            </div>
+
+                                            <strong class="col-xs-1 clock">:</strong>
+                                            <div class="col-xs-3 clock">
+                                                <input name="Control154"  v-model="status.textbox141" id="Stop_at_second2-lo3" class="form-control clock" type="number" />
+                                            </div>
+
+
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="panel panel-default w-100">
+                <div class="panel-heading">
+                    <h4 class="panel-title">
+                        <a data-toggle="collapse" href="#collapse43">External Control:</a>
+                    </h4>
+                </div>
+                <div id="collapse43" class=" w-100 collapsed collapse show">
+                    <div class="panel-body">
+
+                        <div class="col-sm-12">
+                            <div class="row container">
+                                <h4>Delay :</h4>  <input name="Control155" v-model="status.textbox53"  id="Delay" class="form-control" type="number" />
+
+                            </div>
+
+                            <div class="panel panel-default col-sm-6 mt-1">
+                                <div class="panel-heading">
+                                    <h4 class="panel-title">
+                                        <a data-toggle="collapse" href="#collapse44">Phase1:</a>
+                                    </h4>
+
+                                </div>
+                                <div id="collapse44" class=" w-100 collapsed collapse show">
+                                    <div class="panel-body">
+                                        <div class="row container">
+                                            <div class="col-xs-9 container">
+                                                <input name="Control156" v-model="status.textbox15" id="Phase1_curr_Ex" class="form-control" type="number" />
+                                            </div>
+                                            <label class="col-xs-3">MA</label>
+                                        </div>
+
+                                        <div class="row container">
+                                            <div class="container-fluid">
+                                                <span class="switch-label"> Enable/Disable </span>
+                                                <label class="css-control css-control-warning  css-control-sm css-switch">
+                                                    <input name="TurnOn" v-model="status.button36" id="chck_on" v-on:change="button_click('button36','button35')" type="checkbox" class="css-control-input">
+                                                    <span class="css-control-indicator"></span>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                            <div class="panel panel-default col-sm-6">
+                                <div class="panel-heading">
+                                    <h4 class="panel-title">
+                                        <a data-toggle="collapse" href="#collapse46">Phase2:</a>
+                                    </h4>
+                                </div>
+                                <div id="collapse46" class=" w-100 collapsed collapse show">
+                                    <div class="panel-body">
+
+                                        <div class="row container">
+                                            <div class="col-xs-9 container">
+                                                <input name="Control159" v-model="status.textbox50" id="phase2_curr_ex" class="form-control" type="number" />
+                                            </div>
+                                            <label class="col-xs-3">MA</label>
+                                        </div>
+
+                                        <div class="row container">
+                                            <div class="container-fluid">
+                                                <span class="switch-label"> Enable/Disable </span>
+                                                <label class="css-control css-control-warning  css-control-sm css-switch">
+                                                    <input name="TurnOn" v-model="status.button40" id="chck_on" v-on:change="button_click('button40','button39')" type="checkbox" class="css-control-input">
+                                                    <span class="css-control-indicator"></span>
+                                                </label>
+                                            </div>
+                                        </div>
+
+
+
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="panel panel-default col-sm-6">
+                                <div class="panel-heading">
+                                    <h4 class="panel-title">
+                                        <a data-toggle="collapse" href="#collapse47">Phase3:</a>
+                                    </h4>
+                                </div>
+                                <div id="collapse47" class=" w-100 collapsed collapse show">
+                                    <div class="panel-body">
+                                        <div class="row container">
+                                            <div class="col-xs-9 container">
+                                                <input name="Control162" v-model="status.textbox51" id="Phase3_curr_Ex" class="form-control" type="number" />
+                                            </div>
+                                            <label class="col-xs-3">MA</label>
+                                        </div>
+
+                                        <div class="row container">
+                                            <div class="container-fluid">
+                                                <span class="switch-label"> Enable/Disable </span>
+                                                <label class="css-control css-control-warning  css-control-sm css-switch">
+                                                    <input name="TurnOn" v-model="status.button38" id="chck_on" v-on:change="button_click('button38','button37')" type="checkbox" class="css-control-input">
+                                                    <span class="css-control-indicator"></span>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+
+                            </div>
+                            <div class="panel panel-default col-sm-6">
+                                <div class="panel-heading">
+                                    <h4 class="panel-title">
+                                        <a data-toggle="collapse" href="#collapse48">Phase4:</a>
+                                    </h4>
+                                </div>
+                                <div id="collapse48" class="w100 collapse show">
+                                    <div class="panel-body">
+
+                                        <div class="row container">
+                                            <div class="col-xs-9 container">
+                                                <input name="Control165" v-model="status.textbox52"  id="phase4_curr_ex" class="form-control" type="number" />
+                                            </div>
+                                            <label class="col-xs-3">MA</label>
+                                        </div>
+
+                                        <div class="row container">
+                                            <div class="container-fluid">
+                                                <span class="switch-label"> Enable/Disable </span>
+                                                <label class="css-control css-control-warning  css-control-sm css-switch">
+                                                    <input name="TurnOn" v-model="status.button42" id="chck_on" v-on:change="button_click('button42','button41')" type="checkbox" class="css-control-input">
+                                                    <span class="css-control-indicator"></span>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                            <br />
+                            <br />
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="dialog" title="Message">
+    <p id="AlertMessages"></p>
+</div>

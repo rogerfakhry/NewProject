@@ -1,2 +1,0 @@
-# NewProject
-my new project

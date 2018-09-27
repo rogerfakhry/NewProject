@@ -1,0 +1,13 @@
+﻿@{
+    var controller = ViewContext.RouteData.Values["controller"].ToString().ToLower();
+    var action = ViewContext.RouteData.Values["action"].ToString().ToLower();
+    var permissions = (EPermission)ViewBag.Permissions;  
+}
+@if(permissions.CanPublish){
+<div class="control-group required">
+    @(Html.Label("isPublished", "Published", new { @Class = "control-label inlineblock" }))
+    <div class="controls inlineblock">
+        @(Html.CheckBox("isPublished"))
+    </div>
+</div>
+}

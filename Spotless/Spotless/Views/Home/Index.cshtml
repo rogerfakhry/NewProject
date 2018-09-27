@@ -1,0 +1,300 @@
+﻿@model IEnumerable<Spotless.Models.Device>
+
+    @{
+        Layout = "~/Views/Shared/_Layout2.cshtml";
+        var controller = ViewContext.RouteData.Values["controller"].ToString().ToLower();
+        var permissions = (EPermission)ViewBag.Permissions;
+        var isAdmin = Convert.ToBoolean(ViewBag.isAdmin);
+    }
+    <style>
+        #myModal label {
+            color: #428bca;
+        }
+
+        .custom-control.custom-checkbox {
+            margin: 0 auto;
+            margin-left: 2em;
+        }
+
+        label {
+            margin-top: 5px;
+        }
+
+        .map-container {
+            padding: 5px;
+        }
+
+        /* Always set the map height explicitly to define the size of the div
+        * element that contains the map. */
+    </style>
+    <div id="myModal" class="modal" tabindex="-1" role="dialog" aria-labelledby="gridSystemModalLabel">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" style="margin-left:0;margin-right:auto;">Devices List</h4>
+                </div>
+                <div class="modal-body">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Stop Monitoring</button>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+    <script>
+        var checkedonce_Activated = false;
+        var checkedonce_Monitored = false;
+        function FetchResults() {
+            $('.search-loader').show();
+            var activated = checkedonce_Activated == false ? "" : ($('#Activated').is(':checked') ? "True" : "False");
+            var monitored = checkedonce_Monitored == false ? "" : ($('#Monitored').is(':checked') ? "True" : "False");
+            $.post('@(Url.Content("~/Home/FetchResultsByGroupAndDeviceIds"))', "Activated=" + activated + "&Monitored=" + monitored + "&DeviceGroups=" + $('#DeviceGroups').val() + "&DeviceIds=" + $('#DeviceIds').val() + "&isAdmin=" + "@(isAdmin.ToString())" + "@{WriteLiteral(isAdmin ? ("&Customers=\"" + " + " +" $('#Customers').val() + \"") : "");}", function (data) {
+                $('#MapData').html("");
+                //$('#googleMap').remove();
+                //window.google = {};
+                $('.search-loader').hide();
+                $('#MapData').html(data);
+            })
+        }
+
+        function ChangeTurnAllLabel(label) {
+            $("#TurnAll").html(label);
+        }
+        function checkedonce(mode) {
+            switch (mode) {
+                case "activated": checkedonce_Activated = true; break;
+                case "monitored": checkedonce_Monitored = true; break;
+            }
+        }
+        function TurnOffOnDevices(mode) {
+            //console.log(mode);
+            $('#spinner').show();
+            $('#chck_on_all').prop('disabled', true)
+            $('.button-loader').show();
+            var activated = checkedonce_Activated == false ? "" : ($('#Activated').is(':checked') ? "True" : "False");
+            var monitored = checkedonce_Monitored == false ? "" : ($('#Monitored').is(':checked') ? "True" : "False");
+            $.get('@(Url.Content("~/Home/TurnOnOffAllDevices"))', "isOn=" + (mode == '1' ? "True" : "False") + "&Activated=" + activated + "&Monitored=" + monitored + "&DeviceGroups=" + $('#DeviceGroups').val() + "&DeviceIds=" + $('#DeviceIds').val() + "&isAdmin=" + "@(isAdmin.ToString())" + "@{WriteLiteral(isAdmin ? ("&Customers=\"" + " + " +" $('#Customers').val() + \"") : "");}", function (data) {
+                $('#spinner').hide();
+                $('#chck_on_all').removeAttr('disabled');
+                if (data == "True") {
+                    $('#MapData').html("");
+                    //$('#googleMap').remove();
+                    //window.google = {};
+
+                    $('.button-loader').hide();
+                    if (mode == '1') {
+                        checkedonce_Activated = true;
+                        //$('#Activated').prop('checked', true);
+                    } else {
+                        //$('#Activated').removeAttr('checked');
+                        checkedonce_Activated = true;
+                    }
+                    FetchResults();
+                    //$('#partial-container').html(data);
+                    if (mode == 1) {
+                        ChangeTurnAllLabel("Turn Off All");
+                    }
+                    else {
+                        ChangeTurnAllLabel("Turn On All");
+                    }
+                }
+                else {
+                    BeautifulAlert("No device`s state has change!");
+                }
+                
+
+
+            })
+        }
+        function MonitorOnAllDevices() {
+            $('.button-loader').show();
+           
+            var activated = checkedonce_Activated == false ? "" : ($('#Activated').is(':checked') ? "True" : "False");
+            var monitored = checkedonce_Monitored == false ? "" : ($('#Monitored').is(':checked') ? "True" : "False");
+            $.get('@(Url.Content("~/Home/MonitorOnOffAllDevices"))', "isOn=" + "True" + "&Activated=" + activated + "&Monitored=" + monitored + "&DeviceGroups=" + $('#DeviceGroups').val() + "&DeviceIds=" + $('#DeviceIds').val() + "&isAdmin=" + "@(isAdmin.ToString())" + "@{WriteLiteral(isAdmin ? ("&Customers=\"" + " + " +" $('#Customers').val() + \"") : "");}", function (data) {
+                $('#partial-container').html("");
+                //$('#googleMap').remove();
+                //window.google = {};
+                $('.button-loader').hide();
+
+                var results = "<ul>";
+                for (var i = 0; i < data.length; i++) {
+                    results += "<li><label>Device Name  : </label>  " + data[i].TEXT + "  <label> Device Id  :  </label>  " + data[i].VALUE;
+                    results += "<label> Maximum PVVoltage Today : </label>  12  <label> Minimum PVVoltage Today : </label>  144";
+                    results += "<label> Maximum Battery Voltage Today : </label>  12  <label> Minimum Battery Voltage Today  : </label>  144";
+                    results += "<label> Total Consumed Energy Low : </label>  12  <label> Total Consumed Energy High : </label>  144";
+                    results += "<label> Generated Energy Today Low : </label>  12  <label> Generated Energy Today High  : </label>  144";
+                    results += " </li>";
+                }
+                results += "</ul>";
+                $('#myModal').find('.modal-body').html("");
+                $('#myModal').find('.modal-body').html(results);
+                $('#myModal').modal();
+                $('#myModal').on('hidden.bs.modal', function () {
+                    $('.button-loader').show();
+                    var activated1 = checkedonce_Activated == false ? "" : ($('#Activated').is(':checked') ? "True" : "");
+                    var monitored2 = checkedonce_Monitored == false ? "" : ($('#Monitored').is(':checked') ? "True" : "");
+                    $.get('@(Url.Content("~/Home/MonitorOnOffAllDevices"))', "isOn=" + "False" + "&Activated=" + activated + "&Monitored=" + monitored2 + "&DeviceGroups=" + $('#DeviceGroups').val() + "&DeviceIds=" + $('#DeviceIds').val() + "&isAdmin=" + "@(isAdmin.ToString())" + "@{WriteLiteral(isAdmin ? ("&Customers=\"" + " + " +" $('#Customers').val() + \"") : "");}", function (data) {
+                        $('#partial-container').html("");
+                        //$('#googleMap').remove();
+                        //window.google = {};
+                        $('.button-loader').hide();
+                        $('#Monitored').prop('checked', false);
+                        checkedonce_Monitored = true;
+                        alert('stopped monitoring');
+                        FetchResults();
+                    });
+                });
+                $('#Monitored').prop('checked', true);
+                checkedonce_Monitored = true;
+                FetchResults();
+                //$('#partial-container').html(data);
+            })
+        }
+        function ClearResults() {
+            checkedonce_Activated = false;
+            checkedonce_Monitored = false;
+            if ($('#Monitored').is(':checked')) {
+                $('#Monitored').removeAttr('checked');
+            }
+            if ($('#Activated').is(':checked')) {
+                $('#Activated').removeAttr('checked');
+            }
+            clearMultiSelect('DeviceGroups');
+            clearMultiSelect('DeviceIds');
+            @if (isAdmin){
+            WriteLiteral("clearMultiSelect('Customers');");
+        }
+            FetchResults();
+        }
+        function clearMultiSelect(id) {
+            var multiselect = $("#" + id).data("kendoMultiSelect");
+
+            multiselect.value("");
+            multiselect.trigger("change");
+        }
+        function CheckAvailability() {
+            $('#spinner').show();
+            $('#chck_avlble').prop('disabled',true)
+            $.get('@(Url.Content("~/controlDevice/checkDevicesAvialability"))', '', function (data) {
+                FetchResults();
+                $('#spinner').hide();
+                $('#chck_avlble').removeAttr('disabled')
+            });
+
+        }
+    </script>
+    @*<script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?key=AIzaSyDY51Cj9JnKK76_N92zXn6iamMnaKUdN7c"></script>*@
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDY51Cj9JnKK76_N92zXn6iamMnaKUdN7c&libraries=places"></script>
+    <div class="map-container col-md-12">
+        @{
+            var DevicesStyle = "3";
+            var DevicesGroupStyle = "3";
+        }
+        <div class="map-filters row col-md-12 border-bottom-1" style="border-bottom: 2px solid rgb(96, 125, 139);width: auto;padding-bottom: 22px;margin: 0px;">
+            <div class="row col-md-12">
+                @if (isAdmin)
+            {
+                DevicesStyle = "2";
+                DevicesGroupStyle = "2";
+
+                    <div class="col-md-6">
+                        <div class="col-md-12">
+                            @Html.Label("Customers")
+                        </div>
+                        <div class="col-md-12">
+                            @{var customerservices2 = new List<Spotless.Helpers.MultiSelectResult>();}
+                            @Html.MultiSelect("Customers", customerservices2, "Customer", "GetCustomers")
+                        </div>
+                    </div>
+                                }
+                <div class="col-md-6">
+                    <div class="col-md-12">
+                        @Html.Label("Street")
+                    </div>
+                    <div class="col-md-12">
+                        @{var customerservices = new List<Spotless.Helpers.MultiSelectResult>();}
+                        @Html.MultiSelect("DeviceGroups", customerservices, "DeviceGroup", "GetDeviceGroups")
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="col-md-12">
+                        @Html.Label("Street Light Id")
+                    </div>
+                    <div class="col-md-12">
+                        @{var customerservices1 = new List<Spotless.Helpers.MultiSelectResult>();}
+                        @Html.MultiSelect("DeviceIds", customerservices1, "Device", "GetDeviceIds")
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="col-md-12">
+
+                    </div>
+                    <div id="reg" class="col-md-12 ">
+                        @Html.TextBox("Region", null, new { @class = "form-control col-md-3", style = "width:54%;", placeholder = "Region Search Box" })
+                    </div>
+                </div>
+            </div>
+            <div class="row col-md-12">
+                <div class="col-md-6">
+                    <div class="col-md-12">
+                        <label class="custom - control - description" for="Activated"> Show Tuned On Only</label>
+                    </div>
+                    <div class="col-md-12">
+                        <label class="custom-control custom-checkbox">
+                            @Html.CheckBox("Activated", false, new { onchange = "checkedonce('activated')", @Class = "custom-control-input" })
+                            <span class="custom-control-indicator"></span>
+                        </label>
+                    </div>
+                </div>
+                @*<div class="col-md-6">
+                        <div class="col-md-12">
+                            <label class="custom - control - description" for="Monitored">Monitored</label>
+                        </div>
+                        <div class="col-md-12">
+                            <label class="custom-control custom-checkbox">
+                                @Html.CheckBox("Monitored", false, new { onchange = "checkedonce('monitored')", @Class = "custom-control-input" })
+                                <span class="custom-control-indicator"></span>
+                            </label>
+                        </div>
+                    </div>*@
+            </div>
+            <div class="col-md-6">
+                <div class="col-md-12">&nbsp;</div>
+                <div class="col-md-12 search-loader" style="display:none;"><i class="fa fa-refresh fa-spin fa-2x fa-fw"></i></div>
+            </div>
+            <div class="col-md-12">
+                <div class="col-md-12">&nbsp;</div>
+
+                <div class="col-md-12">
+                    <button type="submit" class="btn btn-primary" onclick="FetchResults()">Search</button> &nbsp;&nbsp;&nbsp;
+                    <button type="submit" class="btn btn-primary" onclick="ClearResults()">Clear</button>
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div id="partial-container">
+            <div class="col-md-12 mt-20 ml-20">
+                <div style="display:inline-block;font-weight: 700;"><span id="TurnAll">Turn On All</span>  :</div>
+                <label class="css-control css-control-warning  css-control-sm css-switch">
+                    <input name="TurnAllOn" id="chck_on_all" type="checkbox" onchange="TurnOffOnDevices(this.checked?1:0)" class="css-control-input">
+                    <span class="css-control-indicator"></span>
+                </label>
+                &nbsp;&nbsp;&nbsp;
+                <button type="button" id="chck_avlble" class="btn btn-success" onclick="CheckAvailability()">Check Availability</button>
+                &nbsp;&nbsp;&nbsp; <i id="spinner" class="fa fa-refresh fa-spin fa-2x fa-fw " style="display:none"></i>
+            </div>
+
+            <div id="MapData">
+                @{Html.RenderPartial("DevicesLocation", Model);}
+            </div>
+        </div>
+
+    </div>
+    <div id="dialog" title="Message">
+        <p id="AlertMessages"></p>
+    </div>
+

@@ -1,0 +1,29 @@
+﻿@model Spotless.Models.CustomerType
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@using (Html.BeginForm())
+{
+
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(m => m.id)
+
+    <div class="block">
+        <div class="block-header block-header-default">
+            <h3 class="block-title">Customer Type</h3>
+        </div>
+        <div class="block-content">
+            <div class="form-group row">
+                @Html.LabelFor(m => m.name, new { @Class = "col-12" })
+                <div class="col-md-12">
+                    @Html.TextBoxFor(m => m.name, new { @Class = "form-control" })
+                    @Html.ValidationMessageFor(m => m.name)
+                </div>
+            </div>
+
+            @{Html.RenderPartial("par_Crud");}
+
+        </div>
+    </div>
+                }
